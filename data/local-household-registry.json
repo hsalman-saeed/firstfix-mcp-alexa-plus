@@ -37,5 +37,38 @@
     "notes": "50-gallon natural gas atmospheric water heater.",
     "lastServiceDateIso": "2023-04-12T00:00:00Z",
     "updatedAtIso": "2026-10-15T10:00:00Z"
+  },
+  {
+    "householdId": "household_demo_001",
+    "equipmentId": "eq_bosch_1792066733340",
+    "brand": "Bosch",
+    "modelNumber": "SHPM65Z55N/01",
+    "serialNumber": "FD990400412",
+    "category": "DISHWASHER",
+    "installDateIso": "2024-01-01T00:00:00Z",
+    "updatedAtIso": "2026-10-15T12:18:53.340Z",
+    "notes": "Diagnosed error E24 -> OEM part BOSCH-00631200"
+  },
+  {
+    "householdId": "household_demo_001",
+    "equipmentId": "eq_bosch_1792066783496",
+    "brand": "Bosch",
+    "modelNumber": "SHPM65Z55N/01",
+    "serialNumber": "FD990400412",
+    "category": "DISHWASHER",
+    "installDateIso": "2024-01-01T00:00:00Z",
+    "updatedAtIso": "2026-10-15T12:19:43.496Z",
+    "notes": "Diagnosed error E24 -> OEM part BOSCH-00631200"
+  },
+  {
+    "householdId": "household_demo_001",
+    "equipmentId": "eq_bosch_1792067260161",
+    "brand": "Bosch",
+    "modelNumber": "SHPM65Z55N/01",
+    "serialNumber": "FD990400412",
+    "category": "DISHWASHER",
+    "installDateIso": "2024-01-01T00:00:00Z",
+    "updatedAtIso": "2026-10-15T12:27:40.161Z",
+    "notes": "Diagnosed error E24 -> OEM part BOSCH-00631200"
   }
 ]

@@ -3,6 +3,12 @@ export * from './schemas/discovery.js';
 export * from './data/seedData.js';
 export * from './storage/storageAdapter.js';
 export * from './engine/firstFixEngine.js';
+export * from './server/state.js';
+export * from './server/mcpServer.js';
+export * from './server/ucpCheckout.js';
+export * from './server/localBookingSpi.js';
+export * from './server/ringAccess.js';
+export * from './server/app.js';
 
 export const FIRSTFIX_SERVICE_INFO = {
   name: 'FirstFix MCP',
