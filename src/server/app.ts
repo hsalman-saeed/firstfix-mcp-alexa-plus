@@ -12,6 +12,12 @@ import {
   getOAuthProtectedResourceMetadata,
   getUcpDiscoveryProfile,
 } from '../schemas/discovery.js';
+import {
+  SAMPLE_RATING_PLATES,
+  extractRatingPlate,
+  validateExtractedPlate,
+} from '../ai/ratingPlateVision.js';
+import { runFirstFixAgentWorkflow } from '../ai/firstFixAgent.js';
 
 export interface AppOptions {
   publicBaseUrl?: string;
@@ -60,6 +66,45 @@ export function createApp(options: AppOptions = {}): Express {
   app.get('/api/telemetry', (_req: Request, res: Response) => {
     res.setHeader('Cache-Control', 'no-store');
     res.json(appState.getTelemetry());
+  });
+
+  // --------------------------------------------------------------------------
+  // Sprint 3: AI Multimodal Rating Plate & Agentic Orchestration Endpoints
+  // --------------------------------------------------------------------------
+  app.get('/api/demo/sample-plates', (_req: Request, res: Response) => {
+    res.json({
+      success: true,
+      samplePlates: Object.values(SAMPLE_RATING_PLATES),
+    });
+  });
+
+  app.post('/api/ai/extract-rating-plate', async (req: Request, res: Response) => {
+    try {
+      const extracted = await extractRatingPlate(req.body);
+      const validation = validateExtractedPlate(extracted, req.body.userConfirmedSerial);
+      res.json({
+        success: true,
+        extracted,
+        validation,
+      });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  app.post('/api/ai/orchestrate', async (req: Request, res: Response) => {
+    const startTime = Date.now();
+    try {
+      const result = await runFirstFixAgentWorkflow(req.body);
+      const latency = Date.now() - startTime;
+      const preventedTruckRoll =
+        result.status === 'slot_reserved' || result.status === 'ready_for_booking';
+      appState.recordMcpCall(latency, preventedTruckRoll);
+      res.json(result);
+    } catch (err) {
+      console.error('[AI Orchestrator Error]', err);
+      res.status(500).json({ error: String(err) });
+    }
   });
 
   // --------------------------------------------------------------------------

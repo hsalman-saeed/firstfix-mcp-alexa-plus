@@ -126,11 +126,18 @@ ucpRouter.post('/checkout-sessions', (req: Request, res: Response) => {
         'com.amazon.payments.stored_payment_method',
       ],
     },
-    links: {
-      self: `/checkout-sessions/${sessionId}`,
-      complete: `/checkout-sessions/${sessionId}/complete`,
-      cancel: `/checkout-sessions/${sessionId}/cancel`,
-    },
+    links: Object.assign(
+      [
+        { rel: 'self', href: `/checkout-sessions/${sessionId}` },
+        { rel: 'complete', href: `/checkout-sessions/${sessionId}/complete` },
+        { rel: 'cancel', href: `/checkout-sessions/${sessionId}/cancel` },
+      ],
+      {
+        self: `/checkout-sessions/${sessionId}`,
+        complete: `/checkout-sessions/${sessionId}/complete`,
+        cancel: `/checkout-sessions/${sessionId}/cancel`,
+      }
+    ),
     messages: [],
     createdAtIso: new Date().toISOString(),
     updatedAtIso: new Date().toISOString(),
@@ -314,9 +321,23 @@ ucpRouter.post('/checkout-sessions/:id/cancel', (req: Request, res: Response) =>
     }
   }
 
+  session.messages = [
+    {
+      code: 'session_cancelled',
+      message: 'Checkout session successfully cancelled; reserved OEM part returned to truck inventory.',
+      severity: 'info',
+    },
+  ];
+
   res.status(200).json({
+    ...session,
     id: session.id,
     status: 'cancelled',
-    message: 'Checkout session successfully cancelled; reserved OEM part returned to truck inventory.',
+    currency: session.currency,
+    line_items: session.line_items,
+    totals: session.totals,
+    ucp: session.ucp,
+    links: session.links,
+    messages: session.messages,
   });
 });

@@ -5,12 +5,15 @@ import {
   RecommendedContractorSlot,
   WarrantyStatus,
   SerialRangeRule,
+  ContractorVan,
 } from '../types/index.js';
 import {
   OEMCatalogBOM,
   SafetyRules,
   ContractorVans,
 } from '../data/seedData.js';
+
+export type { SerialVariantBOMResult, ContractorVanMatchResult } from '../types/index.js';
 
 export interface SafetyCheckInput {
   symptomText: string;
@@ -22,7 +25,9 @@ export interface BOMResolutionInput {
   brand: string;
   modelNumber: string;
   serialNumber: string;
-  errorCode: string;
+  errorCode?: string;
+  reportedErrorCode?: string;
+  symptomDescription?: string;
   installDateIso?: string;
 }
 
@@ -153,10 +158,11 @@ export function evaluateSafetyAndPrecheck(input: SafetyCheckInput): SafetyEvalua
  * Resolves exact serial-variant OEM BOM without guessing
  */
 export function resolveSerialVariantBOM(input: BOMResolutionInput): SerialVariantBOMResult {
+  const rawError = input.errorCode || input.reportedErrorCode || '';
   const normBrand = (input.brand || '').trim().toLowerCase();
   const normModel = (input.modelNumber || '').trim().toUpperCase();
   const normSerial = (input.serialNumber || '').trim().toUpperCase();
-  const normError = (input.errorCode || '').trim().toUpperCase();
+  const normError = rawError.trim().toUpperCase();
 
   // Find matching catalog rule
   const catalogEntry = OEMCatalogBOM.find((rule) => {
@@ -210,6 +216,7 @@ export function resolveSerialVariantBOM(input: BOMResolutionInput): SerialVarian
     partName: matchedRange.partName,
     oemPartCostUsd: matchedRange.oemPartCostUsd,
     whySerialVariantMatters: matchedRange.whySerialVariantMatters,
+    serialVariantRuleApplied: matchedRange.serialPatternDescription,
     safe90sDiyPrecheck: matchedRange.safe90sDiyPrecheck || catalogEntry.defaultSafePrecheck,
     warrantyStatus: warranty,
   };
@@ -228,6 +235,7 @@ export function matchStockedContractorSlots(input: VanStockMatchInput): Contract
   const correlationToken = `ff_booking_corr_${Buffer.from(tokenPayload).toString('base64url')}`;
 
   const recommendedSlots: RecommendedContractorSlot[] = [];
+  const stockedVans: ContractorVan[] = [];
   let unstockedSlotsCount = 0;
 
   for (const van of ContractorVans) {
@@ -242,6 +250,10 @@ export function matchStockedContractorSlots(input: VanStockMatchInput): Contract
     );
     const stockQuantity = inventoryItem ? inventoryItem.quantity : 0;
     const hasExactPart = stockQuantity > 0;
+
+    if (hasExactPart && !stockedVans.some((v) => v.vanId === van.vanId)) {
+      stockedVans.push(van);
+    }
 
     for (const slot of van.availableSlots) {
       if (hasExactPart) {
@@ -283,6 +295,7 @@ export function matchStockedContractorSlots(input: VanStockMatchInput): Contract
     correlationToken,
     recommendedSlots,
     unstockedSlotsCount,
+    stockedVans,
     roiMetrics: {
       preventedReturnTruckRollSavingsUsd: 165.0,
       daysSaved: 14,

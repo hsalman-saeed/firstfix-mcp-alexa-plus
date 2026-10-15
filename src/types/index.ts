@@ -115,6 +115,7 @@ export interface SerialVariantBOMResult {
   partName?: string;
   oemPartCostUsd?: number;
   whySerialVariantMatters?: string;
+  serialVariantRuleApplied?: string;
   safe90sDiyPrecheck?: string;
   warrantyStatus?: WarrantyStatus;
   verificationGuidance?: string;
@@ -145,6 +146,7 @@ export interface ContractorVanMatchResult {
   correlationToken: string;
   recommendedSlots: RecommendedContractorSlot[];
   unstockedSlotsCount: number;
+  stockedVans?: ContractorVan[];
   roiMetrics: {
     preventedReturnTruckRollSavingsUsd: number;
     daysSaved: number;

@@ -9,6 +9,9 @@ export * from './server/ucpCheckout.js';
 export * from './server/localBookingSpi.js';
 export * from './server/ringAccess.js';
 export * from './server/app.js';
+export * from './ai/safetyGuardrails.js';
+export * from './ai/ratingPlateVision.js';
+export * from './ai/firstFixAgent.js';
 
 export const FIRSTFIX_SERVICE_INFO = {
   name: 'FirstFix MCP',

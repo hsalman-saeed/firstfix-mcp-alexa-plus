@@ -75,7 +75,7 @@ export interface UcpCheckoutSession {
   ucp: {
     payment_handlers: string[];
   };
-  links: {
+  links: Array<{ rel: string; href: string }> & {
     self: string;
     complete?: string;
     cancel?: string;
