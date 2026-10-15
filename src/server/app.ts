@@ -24,8 +24,22 @@ import {
   renderEmergencyShutoffHtml,
 } from '../mcp/uiTemplates.js';
 
+import { getDynamoStatus, persistRecordAsync } from '../aws/dynamoPersistence.js';
+
 export interface AppOptions {
   publicBaseUrl?: string;
+}
+
+function resolveEffectiveBaseUrl(req: Request, fallback: string): string {
+  if (process.env.PUBLIC_BASE_URL) {
+    return process.env.PUBLIC_BASE_URL.replace(/\/+$/, '');
+  }
+  const proto = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
+  const host = (req.headers['x-forwarded-host'] as string) || req.headers.host || req.get('host');
+  if (host) {
+    return `${proto}://${host}`.replace(/\/+$/, '');
+  }
+  return fallback.replace(/\/+$/, '');
 }
 
 export function createApp(options: AppOptions = {}): Express {
@@ -47,31 +61,56 @@ export function createApp(options: AppOptions = {}): Express {
   });
 
   // --------------------------------------------------------------------------
-  // Discovery & Protocol Profiles
+  // Discovery & Protocol Profiles (Dynamic Base URL)
   // --------------------------------------------------------------------------
-  app.get('/.well-known/oauth-authorization-server', (_req: Request, res: Response) => {
+  app.get('/.well-known/oauth-authorization-server', (req: Request, res: Response) => {
+    const effectiveBase = resolveEffectiveBaseUrl(req, baseUrl);
     res.setHeader('Cache-Control', 'public, max-age=3600');
-    res.json(getOAuthAuthorizationServerMetadata(baseUrl));
+    res.json(getOAuthAuthorizationServerMetadata(effectiveBase));
   });
 
-  app.get('/.well-known/oauth-protected-resource', (_req: Request, res: Response) => {
+  app.get('/.well-known/oauth-protected-resource', (req: Request, res: Response) => {
+    const effectiveBase = resolveEffectiveBaseUrl(req, baseUrl);
     res.setHeader('Cache-Control', 'public, max-age=3600');
-    res.json(getOAuthProtectedResourceMetadata(baseUrl));
+    res.json(getOAuthProtectedResourceMetadata(effectiveBase));
   });
 
-  app.get('/.well-known/ucp', (_req: Request, res: Response) => {
+  app.get('/.well-known/ucp', (req: Request, res: Response) => {
+    const effectiveBase = resolveEffectiveBaseUrl(req, baseUrl);
     res.setHeader('Cache-Control', 'public, max-age=3600');
-    res.json(getUcpDiscoveryProfile(baseUrl));
+    res.json(getUcpDiscoveryProfile(effectiveBase));
   });
 
   // Health and Telemetry
-  app.get('/health', (_req: Request, res: Response) => {
-    res.json({
+  const getHealthPayload = (req: Request) => {
+    const effectiveBase = resolveEffectiveBaseUrl(req, baseUrl);
+    const dynamo = getDynamoStatus();
+    return {
       status: 'ok',
       service: 'firstfix-mcp-alexa-plus',
       mcpSpecVersion: '2025-11-25',
       uptimeSeconds: Math.round(process.uptime()),
-    });
+      awsRegion: process.env.AWS_REGION || 'us-east-1',
+      bedrockModelId: process.env.BEDROCK_MODEL_ID || 'us.amazon.nova-pro-v1:0',
+      dynamoDbTable: process.env.DYNAMODB_TABLE_NAME || 'FirstFixMcpState',
+      dynamoDbStatus: dynamo.status,
+      publicBaseUrl: effectiveBase,
+      mcpEndpoint: `${effectiveBase}/mcp`,
+      ucpDiscoveryEndpoint: `${effectiveBase}/.well-known/ucp`,
+      simulatorUrl: `${effectiveBase}/`,
+    };
+  };
+
+  app.get('/health', (req: Request, res: Response) => {
+    res.json(getHealthPayload(req));
+  });
+
+  app.get('/api/health', (req: Request, res: Response) => {
+    res.json(getHealthPayload(req));
+  });
+
+  app.get('/api/aws/architecture-status', (req: Request, res: Response) => {
+    res.json(getHealthPayload(req));
   });
 
   app.get('/api/telemetry', (_req: Request, res: Response) => {
@@ -138,6 +177,7 @@ export function createApp(options: AppOptions = {}): Express {
       ringAccessWindows: Array.from(appState.ringAccessWindows.values()),
       ringAuditLogs: appState.ringAuditLogs,
       telemetry: appState.getTelemetry(),
+      dynamoDb: getDynamoStatus(),
     });
   });
 

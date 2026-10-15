@@ -9,10 +9,15 @@
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
     "test:bedrock": "tsx src/scripts/testLiveBedrock.ts",
+    "deploy:aws": "tsx src/scripts/deployAwsLive.ts",
     "start": "tsx src/index.ts"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1152.0",
+    "@aws-sdk/client-dynamodb": "^3.1152.0",
+    "@aws-sdk/client-iam": "^3.1152.0",
+    "@aws-sdk/client-lambda": "^3.1152.0",
+    "@aws-sdk/lib-dynamodb": "^3.1152.0",
     "@modelcontextprotocol/ext-apps": "^2.0.3",
     "@modelcontextprotocol/sdk": "^1.32.1",
     "cors": "^2.8.6",
@@ -21,9 +26,12 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^22.13.9",
+    "adm-zip": "^0.6.1",
+    "esbuild": "^0.28.2",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
     "yaml": "^2.7.0"

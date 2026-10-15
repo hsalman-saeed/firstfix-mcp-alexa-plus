@@ -169,5 +169,38 @@
     "installDateIso": "2024-01-01T00:00:00Z",
     "updatedAtIso": "2026-10-15T14:03:20.141Z",
     "notes": "Diagnosed error E24 -> OEM part BOSCH-00631200"
+  },
+  {
+    "householdId": "household_demo_001",
+    "equipmentId": "eq_bosch_1792087539774",
+    "brand": "Bosch",
+    "modelNumber": "SHPM65Z55N/01",
+    "serialNumber": "FD990400412",
+    "category": "DISHWASHER",
+    "installDateIso": "2024-01-01T00:00:00Z",
+    "updatedAtIso": "2026-10-15T18:05:39.774Z",
+    "notes": "Diagnosed error E24 -> OEM part BOSCH-00631200"
+  },
+  {
+    "householdId": "household_demo_001",
+    "equipmentId": "eq_bosch_1792087795777",
+    "brand": "Bosch",
+    "modelNumber": "SHPM65Z55N/01",
+    "serialNumber": "FD990400412",
+    "category": "DISHWASHER",
+    "installDateIso": "2024-01-01T00:00:00Z",
+    "updatedAtIso": "2026-10-15T18:09:55.777Z",
+    "notes": "Diagnosed error E24 -> OEM part BOSCH-00631200"
+  },
+  {
+    "householdId": "household_demo_001",
+    "equipmentId": "eq_bosch_1792087917438",
+    "brand": "Bosch",
+    "modelNumber": "SHPM65Z55N/01",
+    "serialNumber": "FD990400412",
+    "category": "DISHWASHER",
+    "installDateIso": "2024-01-01T00:00:00Z",
+    "updatedAtIso": "2026-10-15T18:11:57.438Z",
+    "notes": "Diagnosed error E24 -> OEM part BOSCH-00631200"
   }
 ]

@@ -1,0 +1,27 @@
+{
+  "deployedAtIso": "2026-10-15T18:04:56.527Z",
+  "serviceName": "firstfix-mcp-alexa-plus",
+  "awsRegion": "us-east-1",
+  "architecture": {
+    "compute": "AWS Lambda (nodejs20.x, 512MB, 30s timeout)",
+    "endpointType": "AWS Lambda Function URL (Public HTTPS, AuthType: NONE)",
+    "database": "Amazon DynamoDB (FirstFixMcpState, PAY_PER_REQUEST)",
+    "multimodalAi": "Amazon Bedrock Nova Pro (us.amazon.nova-pro-v1:0 in us-east-1)"
+  },
+  "liveEndpoints": {
+    "echoShow15SimulatorUrl": "https://firstfix-mcp-alexa-plus.lambda-url.us-east-1.on.aws/",
+    "mcp20251125StreamableHttp": "https://firstfix-mcp-alexa-plus.lambda-url.us-east-1.on.aws/mcp",
+    "ucpDiscoveryEndpoint": "https://firstfix-mcp-alexa-plus.lambda-url.us-east-1.on.aws/.well-known/ucp",
+    "oauthAuthorizationServer": "https://firstfix-mcp-alexa-plus.lambda-url.us-east-1.on.aws/.well-known/oauth-authorization-server",
+    "oauthProtectedResource": "https://firstfix-mcp-alexa-plus.lambda-url.us-east-1.on.aws/.well-known/oauth-protected-resource",
+    "healthStatusEndpoint": "https://firstfix-mcp-alexa-plus.lambda-url.us-east-1.on.aws/api/health",
+    "awsArchitectureStatus": "https://firstfix-mcp-alexa-plus.lambda-url.us-east-1.on.aws/api/aws/architecture-status",
+    "fleetMatrixEndpoint": "https://firstfix-mcp-alexa-plus.lambda-url.us-east-1.on.aws/api/fleet/status"
+  },
+  "verificationResults": {
+    "healthCheckStatus": 200,
+    "ucpDiscoveryStatus": 200,
+    "mcpToolsCount": 5,
+    "echoShow15SimulatorAvailable": true
+  }
+}

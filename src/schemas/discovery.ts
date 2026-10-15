@@ -64,13 +64,14 @@ export function getOAuthProtectedResourceMetadata(baseUrl: string): OAuthProtect
 }
 
 export function getUcpDiscoveryProfile(baseUrl: string): UcpDiscoveryProfile {
+  const normalizedBase = baseUrl.replace(/\/+$/, '');
   return {
     version: '1.0',
     provider: 'FirstFix Home Services',
     endpoints: {
-      checkout_sessions: '/checkout-sessions',
-      orders: '/orders',
-      refunds: '/refunds',
+      checkout_sessions: `${normalizedBase}/checkout-sessions`,
+      orders: `${normalizedBase}/orders`,
+      refunds: `${normalizedBase}/refunds`,
     },
     supported_payment_handlers: [
       'com.amazon.payments.network_token',

@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  FirstFix MCP: Multimodal Serial-Plate Diagnostic, OEM Part Matcher & Stocked-Van Dispatch Engine for Alexa+
+  Amazon Developer Hackathon 2026 (Alexa+ Track, Ring Track, AWS Builder Challenge, Open Source Challenge)
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: nodejs20.x
+    Architectures:
+      - x86_64
+    Environment:
+      Variables:
+        NODE_ENV: production
+        BEDROCK_MODEL_ID: us.amazon.nova-pro-v1:0
+        DYNAMODB_TABLE_NAME: !Ref FirstFixMcpStateTable
+
+Resources:
+  # 1. DynamoDB State Table (PAY_PER_REQUEST billing for zero idle cost)
+  FirstFixMcpStateTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: FirstFixMcpState
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  # 2. Serverless Express / MCP 2025-11-25 Function
+  FirstFixMcpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: firstfix-mcp-alexa-plus
+      CodeUri: dist/lambda-deploy.zip
+      Handler: index.handler
+      Description: FirstFix MCP Serverless Express & Bedrock Nova Pro Dispatch Engine
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowOrigins:
+            - '*'
+          AllowMethods:
+            - '*'
+          AllowHeaders:
+            - '*'
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FirstFixMcpStateTable
+        - Statement:
+            - Sid: BedrockNovaProInvokePolicy
+              Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:InvokeModelWithResponseStream
+                - bedrock:Converse
+                - bedrock:ConverseStream
+              Resource: '*'
+
+Outputs:
+  FirstFixMcpFunctionUrl:
+    Description: Public HTTPS Endpoint for Alexa+ MCP 2025-11-25 Server & Echo Show 15 Simulator
+    Value: !GetAtt FirstFixMcpFunctionUrl.FunctionUrl
+
+  FirstFixMcpMcpEndpoint:
+    Description: Direct MCP 2025-11-25 Streamable HTTP Endpoint
+    Value: !Sub '${FirstFixMcpFunctionUrl.FunctionUrl}mcp'
+
+  FirstFixMcpUcpEndpoint:
+    Description: Universal Commerce Protocol (UCP) Discovery Endpoint
+    Value: !Sub '${FirstFixMcpFunctionUrl.FunctionUrl}.well-known/ucp'
+
+  FirstFixMcpTableArn:
+    Description: Amazon DynamoDB Table ARN
+    Value: !GetAtt FirstFixMcpStateTable.Arn
