@@ -1,0 +1,22 @@
+{
+  "name": "firstfix-mcp-alexa-plus",
+  "version": "1.0.0",
+  "description": "FirstFix MCP: Multimodal serial-plate diagnostic, OEM part matcher, and stocked-van booking engine for Alexa+",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "yaml": "^2.7.0"
+  }
+}

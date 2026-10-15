@@ -1,0 +1,14 @@
+{
+  "resource": "https://mcp.firstfix.example.com/mcp",
+  "authorization_servers": [
+    "https://mcp.firstfix.example.com"
+  ],
+  "scopes_supported": [
+    "mcp:read",
+    "mcp:write",
+    "booking:dispatch"
+  ],
+  "bearer_methods_supported": [
+    "header"
+  ]
+}

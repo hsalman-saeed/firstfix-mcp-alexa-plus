@@ -1,0 +1,68 @@
+{
+  "manifestVersion": "1.0",
+  "storeListing": {
+    "distributionCountries": ["US"],
+    "locales": {
+      "en-US": {
+        "name": {
+          "value": "FirstFix Home Services"
+        },
+        "shortDescription": "Instant appliance & HVAC serial-plate triage, OEM part matching, and guaranteed first-visit local pro booking.",
+        "fullDescription": "FirstFix Home Services eliminates frustrating 'second truck rolls' in residential HVAC, plumbing, and major appliance repair. By analyzing machine symptoms and rating plate serial numbers, FirstFix disambiguates exact OEM parts (such as distinguishing BLDC drain pumps across serial production runs), guides homeowners through 90-second zero-tool safe pre-checks, checks active factory warranties, and routes jobs exclusively to verified local pros who have the required OEM part physically stocked on their van today. FirstFix integrates seamlessly with Alexa+ MCP hosts, Amazon Universal Commerce Protocol (UCP) for transparent diagnostic fee deposits, and Ring smart entry for coordinated technician arrival.",
+        "examplePhrases": [
+          "My Bosch dishwasher is flashing error E24 and won't drain",
+          "Check which local tech has the drain pump for my dishwasher on their van today",
+          "Book the 2 PM FirstFix slot with Apex Home Services",
+          "Verify my water heater serial plate and warranty status"
+        ],
+        "keywords": [
+          "appliance repair",
+          "hvac",
+          "plumbing",
+          "water heater",
+          "dishwasher",
+          "oem parts",
+          "van stock",
+          "contractor dispatch",
+          "first visit fix",
+          "ring access"
+        ]
+      }
+    },
+    "privacyAndCompliance": {
+      "privacyPolicyUrl": "https://firstfix.example.com/privacy",
+      "termsOfUseUrl": "https://firstfix.example.com/terms"
+    },
+    "mediaAssets": {
+      "icons": {
+        "light": {
+          "64x64": "assets/icon_64x64.png",
+          "72x72": "assets/icon_72x72.png",
+          "88x88": "assets/icon_88x88.png",
+          "126x126": "assets/icon_126x126.png",
+          "180x180": "assets/icon_180x180.png",
+          "241x241": "assets/icon_241x241.png"
+        }
+      },
+      "carouselImages": [
+        {
+          "600x900": "assets/carousel_600x900.png",
+          "altText": "FirstFix multimodal diagnostic and stocked van booking workflow"
+        }
+      ]
+    }
+  },
+  "integrations": [
+    {
+      "type": "MCP",
+      "config": {
+        "endpoints": {
+          "default": {
+            "type": "HTTPS",
+            "uri": "https://mcp.firstfix.example.com/mcp"
+          }
+        }
+      }
+    }
+  ]
+}

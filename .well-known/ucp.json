@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "provider": "FirstFix Home Services",
+  "endpoints": {
+    "checkout_sessions": "/checkout-sessions",
+    "orders": "/orders",
+    "refunds": "/refunds"
+  },
+  "supported_payment_handlers": [
+    "com.amazon.payments.network_token",
+    "com.amazon.payments.stored_payment_method"
+  ],
+  "supported_currencies": [
+    "USD"
+  ],
+  "capabilities": [
+    "instant_deposit_hold",
+    "credit_to_final_repair_invoice",
+    "split_technician_escrow"
+  ]
+}
