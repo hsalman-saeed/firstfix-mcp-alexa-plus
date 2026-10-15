@@ -1,81 +1,229 @@
-# FirstFix MCP (Alexa+)
+# FirstFix MCP: Multimodal Serial-Variant Part Matcher & Stocked-Van Dispatch Engine
 
-**FirstFix MCP** is a B2B2C multimodal pre-dispatch diagnostic, serial-variant OEM part matcher, and stocked-van booking engine built for the **Build, Ship, Shape: Amazon Developer Hackathon 2026** (Primary Track: **Alexa+**, Secondary Dual-Track: **Ring**, Mini Challenges: **AWS Builder** and **Open Source**).
+[![AWS Lambda](https://img.shields.io/badge/AWS_Lambda-Public_HTTPS_Function_URL-FF9900?logo=awslambda&logoColor=white)](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/)
+[![Amazon DynamoDB](https://img.shields.io/badge/Amazon_DynamoDB-PAY__PER__REQUEST-4053D6?logo=amazondynamodb&logoColor=white)](https://aws.amazon.com/dynamodb/)
+[![Amazon Bedrock](https://img.shields.io/badge/Amazon_Bedrock-Nova_Pro_Vision-232F3E?logo=amazon&logoColor=white)](https://aws.amazon.com/bedrock/)
+[![MCP 2025-11-25](https://img.shields.io/badge/MCP-2025--11--25_Streamable_HTTP-0A84FF)](https://modelcontextprotocol.io/)
+[![UCP 2026-01-11](https://img.shields.io/badge/UCP-2026--01--11_Checkout-00C7BE)](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/ucp)
+[![Tests Passing](https://img.shields.io/badge/Tests-60%2F60_Passing-34C759)](tests/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-FirstFix eliminates the single costliest friction in home services: the **"second truck roll"** (where a technician arrives, diagnoses the issue, discovers they lack the exact OEM replacement part, and charges the customer for a return visit 7–14 days later).
-
----
-
-## Sprint 1 & Sprint 2 Deliverables Overview
-
-### Sprint 1: Monorepo Foundation & Protocol Discovery
-1. **Official Protocol & Discovery Manifests**:
-   - `addon-package/addon.json`: Official Alexa+ MCP QuickStart schema with strict character length limits, 6 light icon sizes, and HTTPS endpoint definition.
-   - `skills/firstfix-dispatch-skill/SKILL.md`: Valid YAML frontmatter meeting the open `agentskills.io` standard with 5-step deterministic workflow and strict safety prohibitions.
-   - `.well-known/oauth-authorization-server.json`: OAuth 2.1 authorization server metadata with `S256` PKCE.
-   - `.well-known/oauth-protected-resource.json`: Protected resource metadata per RFC 9728.
-   - `.well-known/ucp.json`: Universal Commerce Protocol profile with Amazon payments handlers.
-
-2. **100% Deterministic Domain Engine & Seed Data**:
-   - `src/data/seedData.ts`: 15 realistic residential OEM BOM rules (including Bosch dishwasher BLDC vs twist-lock disambiguation, Rheem FV sensor, Carrier run capacitor), safety shutoffs, 4 contractor van inventories, and household registry.
-   - `src/engine/firstFixEngine.ts`: Pure TypeScript domain engine functions for safety hazard filtering, serial-variant BOM resolution, and stocked-van matching.
-   - `src/storage/storageAdapter.ts`: Local JSON & DynamoDB dual storage adapter with simulated multi-session state updates.
-
-### Sprint 2: Core Backend Server, MCP Streamable HTTP & Protocols
-1. **Audit Fix A-1 (True-Dimension PNG Generator)**:
-   - `src/scripts/generateValidAssets.ts`: Binary-level PNG chunk generator writing exact required dimensions (`64x64`, `72x72`, `88x88`, `126x126`, `180x180`, `241x241`, `600x900`) with CRC32 checksums into `addon-package/assets/`.
-
-2. **MCP Specification 2025-11-25 over Streamable HTTP (`POST /mcp`)**:
-   - `src/server/mcpServer.ts`: MCP server factory using `@modelcontextprotocol/sdk` and `@modelcontextprotocol/ext-apps/server`.
-   - Exposes 2 MCP App UI Resources: `ui://firstfix/diagnostic-intake.html` and `ui://firstfix/stocked-pro-carousel.html`.
-   - Exposes 5 MCP Tools: `diagnose_equipment_and_bom`, `run_safety_and_diy_precheck`, `get_stocked_van_availability`, `reserve_part_and_slot`, and `sync_ring_technician_access`.
-   - All tool calls execute in `<500ms` and record `executionLatencyMs`.
-
-3. **Alexa+ Universal Commerce Protocol (UCP) Checkout Endpoints**:
-   - `src/server/ucpCheckout.ts`: Full UCP lifecycle (`POST /checkout-sessions`, `GET /checkout-sessions/:id`, `PUT /checkout-sessions/:id`, `POST /checkout-sessions/:id/complete`, `POST /checkout-sessions/:id/cancel`).
-   - 24-hour `Idempotency-Key` deduplication, body hash conflict detection (`HTTP 409 Conflict`), and `Request-Id` echoing.
-
-4. **Alexa+ Local Booking SPI (`com.amazon.alexa.localbooking.v1`)**:
-   - `src/server/localBookingSpi.ts`: REST routes for `GetBusiness`, `GetServices`, `GetAvailability` (RFC 3339 timestamps), `CreateAppointment`, and idempotent `CancelAppointment`.
-
-5. **Ring Track Verified Technician Arrival & Temporary Access Control API**:
-   - `src/server/ringAccess.ts`: Access window arming (`/v1/ring/access-windows`) and doorbell arrival simulation (`/v1/ring/simulate-arrival`) with camera token matching and monitored unlock authorization.
+> **Amazon Developer Hackathon 2026 Entry**  
+> **Primary Track:** Alexa+  
+> **Secondary Track:** Ring  
+> **Mini Challenges:** AWS Builder Challenge ($5,000 + $5,000 AWS Credits) & Open Source Challenge ($5,000 + $5,000 AWS Credits)  
+> **Bonus Submission:** Official Rules Section 6 (+10% Friction Log Judging Bonus in [`docs/FRICTION_LOGS_10_PERCENT_BONUS.md`](docs/FRICTION_LOGS_10_PERCENT_BONUS.md))  
+> **Live Public AWS Production Endpoint:** [`https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/)
 
 ---
 
-## Quick Start
+## 🚀 30-SECOND JUDGE QUICK-START (LIVE CLOUD DEMO)
 
-### 1. Prerequisites
-- Node.js v18+ (tested on v24.15.0)
-- npm v9+ (tested on v11.12.1)
+Judges can test the fully deployed system immediately over public HTTPS with zero local installation:
 
-### 2. Installation
+| Target Component | Live Cloud URL / Method | Description |
+|---|---|---|
+| **Dual-Screen Echo Show 15 Simulator** | [👉 `GET /`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/) | Interactive multimodal simulator (Echo Show 15 + Contractor Fleet Matrix + Ring Doorbell) |
+| **MCP 2025-11-25 Server** | `POST /mcp` | Streamable HTTP endpoint serving all 5 tools and 3 interactive UI resources |
+| **UCP Discovery Manifest** | [`GET /.well-known/ucp`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/ucp) | Universal Commerce Protocol (`2026-01-11`) capability profile |
+| **OAuth 2.1 Server Metadata** | [`GET /.well-known/oauth-authorization-server`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/oauth-authorization-server) | RFC 8414 & RFC 9728 discovery metadata |
+| **Live AWS Architecture Health** | [`GET /api/health`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/health) | Live telemetry (`us-east-1`, `FirstFixMcpState`, `us.amazon.nova-pro-v1:0`) |
+
+### Instant `curl` Verification Commands:
+
 ```bash
-npm install
+# 1. Query the live MCP server for all 5 registered tools
+curl -X POST https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":"judge-list-test","method":"tools/list"}'
+
+# 2. Execute deterministic serial-variant BOM diagnosis (Bosch FD99 -> BOSCH-00631200 BLDC Pump)
+curl -X POST https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": "judge-diag-test",
+    "method": "tools/call",
+    "params": {
+      "name": "diagnose_equipment_and_bom",
+      "arguments": {
+        "brand": "Bosch",
+        "modelNumber": "SHPM65Z55N/01",
+        "serialNumber": "FD991001234",
+        "errorCode": "E24"
+      }
+    }
+  }'
+
+# 3. Check live AWS architecture status and DynamoDB connection
+curl https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/aws/architecture-status
 ```
 
-### 3. Generate Valid True-Dimension PNG Assets
-```bash
-npx tsx src/scripts/generateValidAssets.ts
+---
+
+## 🎯 THE $150–$180 "SECOND TRUCK ROLL" PROBLEM
+
+In residential trade services (HVAC, plumbing, and major appliance repair), over **37% of service calls fail on the first visit**. The root cause is almost always the same:
+1. A homeowner calls a repair service because their dishwasher won't drain or their water heater shut down.
+2. The dispatcher books whatever contractor is available on the calendar.
+3. The technician drives across town, opens the appliance, and discovers that the manufacturer changed part engineering mid-production (e.g. Bosch moving from an AC twist-lock pump to a brushless DC pump in batch FD99).
+4. The technician does **not** have the updated part on their van. They charge a trip fee, order the part, and schedule a second visit 7 days later.
+5. **The Cost:** The unstocked "second truck roll" costs the contractor **$150 to $180** in wasted labor, fuel, and scheduling capacity, while leaving the homeowner stranded without essential appliances.
+
+**FirstFix MCP solves this natively inside Alexa+ and Ring:**  
+AI handles multimodal vision (reading rating-plate photos) and conversational guidance, while **100% of OEM part numbers, serial runs, pricing, and safety halts come strictly from our deterministic engine**. Alexa+ only dispatches contractors who physically have the required OEM part on their van today.
+
+---
+
+## 🔬 SERIAL-VARIANT DISAMBIGUATION: WHY DETERMINISTIC CODE MATTERS
+
+LLMs frequently hallucinate mechanical part numbers or confuse revision numbers. FirstFix enforces a strict rule: **Zero AI Guesswork on Physical Parts**.
+
+| Equipment & Fault | Serial Run / FD Batch | Disambiguated OEM Part | Part SKU & Cost | Why Disambiguation Matters (Counterfactual Proof) |
+|---|---|---|---|---|
+| **Bosch Dishwasher** (Error `E24` Won't Drain) | `FD99000000` to `FD99999999` (2019+ Batch) | Bosch 3-Prong Brushless DC (BLDC) Pump | `BOSCH-00631200` ($42.00) | **Newer BLDC chassis.** Fitting legacy AC pump causes direct electronic control module burnout. |
+| **Bosch Dishwasher** (Error `E24` Won't Drain) | `FD97000000` to `FD98999999` (2017–2018 Batch) | Bosch Legacy Twist-Lock Bayonet AC Pump | `BOSCH-00611332` ($46.00) | **Legacy chassis.** Fitting newer BLDC pump fails mechanically due to incompatible bayonet mount. |
+| **Rheem Gas Water Heater** (Flashing 7-Flash Code) | `M012200000`+ (Post-Jan 2022 Resettable) | Rheem Resettable Resistor FV Sensor | `RHEEM-SP20245` ($38.50) | **Resettable probe.** Replacing with older thermal fuse prevents auto-recovery. |
+| **Rheem Gas Water Heater** (Flashing 7-Flash Code) | Prior to `M012200000` (Pre-2022 One-Time Fuse) | Rheem One-Shot Thermal Cutoff Fuse | `RHEEM-SP14255` ($29.00) | **One-time sacrificial link.** Fitting resettable probe breaches factory UL fire listing. |
+
+---
+
+## 🏛️ SYSTEM ARCHITECTURE & AWS CLOUD TOPOLOGY
+
+FirstFix MCP is deployed live to AWS `us-east-1` with 100% serverless, zero-idle-cost infrastructure:
+
+```mermaid
+flowchart TD
+    subgraph ClientLayer["Echo Show 15 & Alexa+ Clients"]
+        ES15["Echo Show 15 Multimodal Display (1080p)"]
+        Voice["Alexa+ Voice Host (Streaming Audio)"]
+        Camera["Rating Plate Image Upload (JPEG/PNG)"]
+    end
+
+    subgraph AWSCloud["AWS us-east-1 Cloud Infrastructure"]
+        LambdaUrl["AWS Lambda Function URL (Public HTTPS Auth: NONE)<br/>https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws"]
+        
+        subgraph ServerlessCompute["AWS Lambda (nodejs20.x, 512MB, 30s)"]
+            Handler["Express HTTP Bridge (src/aws/lambdaHandler.ts)"]
+            MCPEngine["MCP 2025-11-25 Streamable HTTP Server (POST /mcp)"]
+            UCPEngine["Universal Commerce Protocol (2026-01-11 Checkout)"]
+            BookingEngine["Alexa+ Local Booking SPI (com.amazon.alexa.localbooking.v1)"]
+            RingController["Ring Smart Access Controller (Arrival Windows)"]
+            DeterministicBOM["Deterministic OEM BOM Engine (Zero Hallucination)"]
+        end
+
+        subgraph ManagedServices["AWS Managed Cloud Services"]
+            Bedrock["Amazon Bedrock Nova Pro<br/>us.amazon.nova-pro-v1:0 (Rating-Plate Vision)"]
+            DynamoDB["Amazon DynamoDB<br/>FirstFixMcpState (PAY_PER_REQUEST)"]
+        end
+    end
+
+    Camera -->|Upload Image| Handler
+    Voice -->|Voice Intent| MCPEngine
+    ES15 -->|Render UI Apps| Handler
+
+    Handler --> MCPEngine
+    Handler --> UCPEngine
+    Handler --> BookingEngine
+    Handler --> RingController
+
+    MCPEngine --> DeterministicBOM
+    Handler -->|Async Perception| Bedrock
+    DeterministicBOM -->|State Sync & Audit| DynamoDB
 ```
 
-### 4. Typecheck
-```bash
-npm run typecheck
-```
+---
 
-### 5. Run Test Suite (Sprint 1 + Sprint 2)
+## 📦 OPEN SOURCE MINI CHALLENGE DELIVERABLES
+
+To maximize community impact, FirstFix MCP delivers two standalone open-source contributions:
+
+### 1. Standalone SDK: `packages/alexa-plus-ucp-mcp-kit`
+An MIT-licensed, zero-dependency TypeScript toolkit that solves the top 5 protocol integration friction points:
+- `normalizeMcpStreamableHeaders()`: Normalizes `Accept` headers to prevent HTTP 406 rejections from stateless clients.
+- `createUcpIdempotencyStore(ttlMs)`: 24-hour RFC-compliant `Idempotency-Key` store with SHA-256 payload fingerprinting and automatic `HTTP 409 Conflict` detection on mutated bodies.
+- `buildUcpEnvelope(params)`: Generates compliant `dev.ucp.shopping.checkout` (`2026-01-11`) envelopes for `/checkout-sessions`, `/complete`, and `/cancel`.
+- `createCorrelationTokenBridge()`: Generates and verifies HMAC-SHA256 cryptographically linked `correlationToken` values binding UCP sessions to Local Booking SPI appointments and Ring access passes.
+- `buildMcpAppPostMessageScript()`: Generates the client-side JSON-RPC 2.0 `window.parent.postMessage` bridge (`ui/initialize`, `ui/message`, `ui/update-context`) for `text/html;profile=mcp-app` visual cards.
+- `validateAddonImageDimensions()`: Validates PNG IHDR binary headers to prevent store submission rejection.
+
+👉 **Explore the SDK:** [`packages/alexa-plus-ucp-mcp-kit/README.md`](packages/alexa-plus-ucp-mcp-kit/README.md)
+
+### 2. Community Agent Skill: `AmazonAppDev/devices-agent-skills`
+A ready-to-merge contribution bundle for `https://github.com/AmazonAppDev/devices-agent-skills`:
+- Standard `agentskills.io` compliant instructions teaching AI coding assistants (Claude Code, Cursor, Antigravity) how to build Alexa+ Add-Ons and UCP servers without friction.
+- Complete pull request template ready for submission.
+
+👉 **View Contribution Bundle:** [`open-source-contribution/devices-agent-skills/`](open-source-contribution/devices-agent-skills/)
+
+---
+
+## 📑 HACKATHON DOCUMENTATION SUITE
+
+All official submission materials and judging bonus documents are organized in `docs/`:
+
+1. **[Friction Logs (+10% Bonus)](docs/FRICTION_LOGS_10_PERCENT_BONUS.md)**: 8 structured friction logs covering MCP headers, Express streams, Bedrock latency, UCP envelopes, and Lambda URL policies.
+2. **[5-Part Product Feedback](docs/PRODUCT_FEEDBACK_5_PARTS.md)**: Comprehensive feedback for Amazon teams across Alexa+ Add-Ons, MCP Apps, UCP, Local Booking SPI, and Bedrock.
+3. **[Demo Video Script & Shot List](docs/DEMO_VIDEO_PRODUCTION_SCRIPT.md)**: Timed, 2:45 scene-by-scene script and screen-recording runbook.
+4. **[Devpost Submission Master](docs/DEVPOST_SUBMISSION_MASTER.md)**: Ready-to-paste Devpost text for all form fields.
+
+---
+
+## 🧪 AUTOMATED TEST SUITE (60/60 TESTS PASSING)
+
+FirstFix MCP maintains strict test-driven development across all 6 project sprints:
+
 ```bash
+# Run all 60 tests across Sprints 1–6
 npm test
 ```
 
-### 6. Start the Server Locally
+| Test Suite | File | Tests | Coverage |
+|---|---|---|---|
+| **Sprint 1** | `tests/sprint1.test.ts` | 10/10 | Manifest schemas, deterministic BOM engine, safety hazard shutoffs |
+| **Sprint 2** | `tests/sprint2.test.ts` | 10/10 | MCP 2025-11-25 Streamable HTTP, UCP Checkout, Local Booking SPI, Ring API |
+| **Sprint 3** | `tests/sprint3.test.ts` | 10/10 | Bedrock Nova Pro vision, prompt injection defense, OCR confidence gating |
+| **Sprint 4** | `tests/sprint4.test.ts` | 10/10 | Interactive MCP Apps (`ui://`), Echo Show 15 simulator, fleet console |
+| **Sprint 5** | `tests/sprint5.test.ts` | 10/10 | Standalone SDK (`alexa-plus-ucp-mcp-kit`), community skill, AWS bridge |
+| **Sprint 6** | `tests/sprint6.test.ts` | 10/10 | Real AWS Lambda Function URL, DynamoDB state, live internet smoke tests |
+| **TOTAL** | **All 6 Sprints** | **60/60** | **100% Passing with 0 Errors** |
+
+---
+
+## 🛠️ LOCAL DEVELOPMENT RUNBOOK
+
+### Prerequisites
+- Node.js v18+ (tested on Node.js v24.15.0)
+- npm v9+ (tested on npm v11.12.1)
+- AWS Account with Bedrock Nova Pro access (for live AI features)
+
+### 1. Clone & Install
 ```bash
-npm start
-# Server listens on http://localhost:3001
+git clone https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus.git
+cd firstfix-mcp-alexa-plus
+npm install --legacy-peer-deps
+```
+
+### 2. Configure Environment
+```bash
+cp .env.example .env
+# Edit .env with your AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_REGION=us-east-1
+```
+
+### 3. Start Local Development Server
+```bash
+npm run dev
+# Server opens at http://localhost:3001 with live reload
+```
+
+### 4. Deploy Live to AWS (1-Command Automation)
+```bash
+npm run deploy:aws
+# Automatically bundles Lambda handler, provisions DynamoDB table, updates IAM roles,
+# and configures the public HTTPS Function URL in us-east-1!
 ```
 
 ---
 
-## License
-MIT License (see [LICENSE](LICENSE)).
+## 📄 LICENSE
+This project is open-source software licensed under the [MIT License](LICENSE).

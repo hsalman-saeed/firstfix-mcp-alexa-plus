@@ -1,7 +1,9 @@
 {
   "manifestVersion": "1.0",
   "storeListing": {
-    "distributionCountries": ["US"],
+    "distributionCountries": [
+      "US"
+    ],
     "locales": {
       "en-US": {
         "name": {
@@ -59,7 +61,7 @@
         "endpoints": {
           "default": {
             "type": "HTTPS",
-            "uri": "https://mcp.firstfix.example.com/mcp"
+            "uri": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/mcp"
           }
         }
       }

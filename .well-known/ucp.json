@@ -2,9 +2,9 @@
   "version": "1.0",
   "provider": "FirstFix Home Services",
   "endpoints": {
-    "checkout_sessions": "/checkout-sessions",
-    "orders": "/orders",
-    "refunds": "/refunds"
+    "checkout_sessions": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/checkout-sessions",
+    "orders": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/orders",
+    "refunds": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/refunds"
   },
   "supported_payment_handlers": [
     "com.amazon.payments.network_token",
