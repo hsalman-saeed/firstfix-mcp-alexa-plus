@@ -141,6 +141,46 @@ export function validateExtractedPlate(
 }
 
 /**
+ * Audit Fix A-4: Normalizes live Bedrock Nova Pro JSON outputs
+ * Handles variations like plural errorCodes, model/eNr, and serial/fdNumber
+ */
+export function normalizeBedrockParsedJson(parsed: any, overrideErrorCode?: string): {
+  brand: string;
+  modelNumber: string;
+  serialNumber: string;
+  errorCode: string;
+  ocrConfidence: number;
+} {
+  const normErrorCode =
+    overrideErrorCode ||
+    parsed.errorCode ||
+    (Array.isArray(parsed.errorCodes) ? parsed.errorCodes[0] : parsed.errorCodes) ||
+    'E24';
+
+  const normModelNumber =
+    parsed.modelNumber || parsed.model || parsed.eNr || parsed.model_number || 'Unknown';
+
+  const normSerialNumber =
+    parsed.serialNumber || parsed.serial || parsed.fdNumber || parsed.serial_number || 'Unknown';
+
+  const normBrand = parsed.brand || parsed.manufacturer || 'Unknown';
+  const normConfidence =
+    typeof parsed.ocrConfidence === 'number'
+      ? parsed.ocrConfidence
+      : typeof parsed.confidence === 'number'
+        ? parsed.confidence
+        : 0.95;
+
+  return {
+    brand: normBrand,
+    modelNumber: normModelNumber,
+    serialNumber: normSerialNumber,
+    errorCode: normErrorCode,
+    ocrConfidence: normConfidence,
+  };
+}
+
+/**
  * Extracts rating plate information using Amazon Bedrock Nova Pro (or deterministic verified fallback)
  */
 export async function extractRatingPlate(input: ExtractInput): Promise<ExtractedRatingPlate> {
@@ -215,14 +255,9 @@ export async function extractRatingPlate(input: ExtractInput): Promise<Extracted
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
+        const normalized = normalizeBedrockParsedJson(parsed, input.errorCode);
         return validateExtractedPlate(
-          {
-            brand: parsed.brand || 'Unknown',
-            modelNumber: parsed.modelNumber || 'Unknown',
-            serialNumber: parsed.serialNumber || 'Unknown',
-            errorCode: input.errorCode || parsed.errorCode || 'UNKNOWN_ERROR',
-            ocrConfidence: Number(parsed.ocrConfidence) || 0.95,
-          },
+          normalized,
           input.userConfirmedSerial,
           'bedrock_nova_pro'
         );

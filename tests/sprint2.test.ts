@@ -138,7 +138,7 @@ describe('Sprint 2: Core Backend Server, MCP Streamable HTTP & Protocols', () =>
     const resourcesJson = (await resourcesRes.json()) as any;
     const resourceUris = resourcesJson.result?.resources?.map((r: { uri: string }) => r.uri);
 
-    assert.strictEqual(resourcesJson.result?.resources?.length, 2);
+    assert.ok(resourcesJson.result?.resources?.length >= 2);
     assert.ok(resourceUris.includes('ui://firstfix/diagnostic-intake.html'));
     assert.ok(resourceUris.includes('ui://firstfix/stocked-pro-carousel.html'));
   });

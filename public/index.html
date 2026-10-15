@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FirstFix MCP — Dual-Screen Echo Show 15 Simulator & Contractor Fleet Console</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <!-- Top Navigation & KPI Bar -->
+  <header class="top-nav">
+    <div class="brand">
+      <div class="brand-logo">🔧 FirstFix <span class="badge-mcp">MCP 2025-11-25</span></div>
+      <div class="brand-sub">Amazon Developer Hackathon 2026 • Dual-Track: Alexa+ & Ring</div>
+    </div>
+
+    <div class="kpi-group">
+      <div class="kpi-pill">
+        <span class="kpi-label">2nd Truck Rolls Prevented</span>
+        <span class="kpi-val" id="kpi-rolls">0</span>
+      </div>
+      <div class="kpi-pill">
+        <span class="kpi-label">Fleet & Homeowner Savings</span>
+        <span class="kpi-val green" id="kpi-savings">$0</span>
+      </div>
+      <div class="kpi-pill">
+        <span class="kpi-label">First-Visit Fix Rate</span>
+        <span class="kpi-val cyan">96% <small style="font-size:10px; color:#9ca3af;">(vs 63%)</small></span>
+      </div>
+      <div class="kpi-pill">
+        <span class="kpi-label">Avg Tool Latency</span>
+        <span class="kpi-val" id="kpi-latency">&lt;25ms</span>
+      </div>
+      <div class="kpi-pill highlight">
+        <span class="kpi-label">Bedrock Vision</span>
+        <span class="kpi-val amber" id="kpi-bedrock">Nova Pro v1:0</span>
+      </div>
+      <button class="btn-reset" id="btn-top-reset" title="Reset seed state, van inventory & appointments">
+        🔄 Reset Demo State
+      </button>
+    </div>
+  </header>
+
+  <!-- Dual-Screen Command Center Container -->
+  <main class="command-center">
+    <!-- LEFT PANEL: Alexa+ Echo Show 15 Simulator -->
+    <section class="panel-left">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="icon">📺</span>
+          <span>Alexa+ Echo Show 15 Device Simulator</span>
+        </div>
+        <div class="audio-controls">
+          <button class="btn-audio" id="btn-toggle-speech" title="Toggle Web Speech TTS">
+            🔊 Alexa Voice: ON
+          </button>
+        </div>
+      </div>
+
+      <!-- Preset Scenarios -->
+      <div class="scenario-bar">
+        <div class="scenario-label">1-CLICK DEMO SCENARIOS:</div>
+        <div class="scenario-buttons">
+          <button class="btn-scenario active" data-scenario="1">
+            <span class="scenario-num">1</span>
+            <span>Bosch FD99 Happy Path (98%)</span>
+          </button>
+          <button class="btn-scenario" data-scenario="2">
+            <span class="scenario-num">2</span>
+            <span>Bosch FD98 Blurry Plate (&lt;0.90 Gate)</span>
+          </button>
+          <button class="btn-scenario" data-scenario="3">
+            <span class="scenario-num">3</span>
+            <span>Rheem Water Heater FV Sensor</span>
+          </button>
+          <button class="btn-scenario" data-scenario="4">
+            <span class="scenario-num">4</span>
+            <span>Gas Leak Emergency Halt</span>
+          </button>
+          <button class="btn-scenario" data-scenario="5">
+            <span class="scenario-num">5</span>
+            <span>Prompt-Injection Defense</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Echo Show 15 Physical Bezel -->
+      <div class="echo-show-bezel">
+        <div class="bezel-camera"></div>
+        <div class="echo-screen">
+          <!-- Voice Waveform & Transcript Bar -->
+          <div class="echo-voice-bar">
+            <div class="waveform" id="waveform">
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+              <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+            </div>
+            <div class="transcript" id="voice-transcript">
+              "FirstFix agent standing by. Select a demo scenario or speak to begin diagnostics."
+            </div>
+          </div>
+
+          <!-- Sandboxed MCP App Iframe -->
+          <div class="iframe-container">
+            <iframe id="mcp-app-iframe" src="/api/mcp-apps/diagnostic-intake.html" title="FirstFix MCP App Viewport"></iframe>
+          </div>
+
+          <!-- Bottom Device Bar -->
+          <div class="device-bottom-bar">
+            <div class="active-app-badge">
+              <span class="pulse-dot"></span>
+              <span id="active-app-uri">ui://firstfix/diagnostic-intake.html</span>
+            </div>
+            <div class="device-hint">Interact directly with buttons inside the Echo Show screen above 👆</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manual Utterance / Trigger Box -->
+      <div class="trigger-box">
+        <div class="trigger-row">
+          <input type="text" id="input-utterance" class="input-text" placeholder="Speak to Alexa+ (e.g. 'My Bosch dishwasher throws error E24')" value="My Bosch dishwasher stopped draining and displays error code E24.">
+          <select id="select-plate-preset" class="select-preset">
+            <option value="sample_bosch_fd99">Plate: Bosch FD99 (98% Conf)</option>
+            <option value="sample_bosch_fd98_blurry">Plate: Bosch FD98 Blurry (82% Conf)</option>
+            <option value="sample_rheem_fv">Plate: Rheem FV Sensor (96% Conf)</option>
+            <option value="sample_carrier_cap">Plate: Carrier AC Run Cap (95% Conf)</option>
+          </select>
+          <button class="btn-run" id="btn-run-orchestration">
+            ⚡ Run Alexa+ Orchestrator
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: Contractor Fleet Console, Ring Smart Arrival & Protocol Inspector -->
+    <section class="panel-right">
+      <!-- Tabs -->
+      <div class="tabs-header">
+        <button class="tab-btn active" data-tab="tab-fleet">
+          🚚 Contractor Fleet & Van Inventory
+        </button>
+        <button class="tab-btn" data-tab="tab-ring">
+          🔔 Ring Smart Arrival Access
+        </button>
+        <button class="tab-btn" data-tab="tab-protocol">
+          🔍 MCP & Agent Reasoning Trace
+        </button>
+      </div>
+
+      <!-- TAB 1: Contractor Fleet Console -->
+      <div class="tab-content active" id="tab-fleet">
+        <div class="tab-intro">
+          <strong>Real-Time Van Stock & ROI Engine:</strong>
+          Shows live stock counts on all 4 contractor vans in ZIP 98101. When an appointment is reserved via Alexa+ UCP, stock is held and decremented in real time.
+        </div>
+
+        <div class="fleet-cards" id="fleet-van-list">
+          <!-- Populated dynamically via /api/fleet/status -->
+        </div>
+
+        <div class="roi-summary-card">
+          <div class="roi-header">
+            <span>📊 Second-Truck-Roll Economic Impact</span>
+            <span class="badge-verified">Verified Metrics</span>
+          </div>
+          <div class="roi-grid">
+            <div class="roi-metric">
+              <div class="val" id="roi-prevented-rolls">0</div>
+              <div class="lbl">2nd Truck Rolls Prevented</div>
+            </div>
+            <div class="roi-metric">
+              <div class="val" id="roi-dollars-saved">$0</div>
+              <div class="lbl">Direct Dollar Savings ($165/ea)</div>
+            </div>
+            <div class="roi-metric">
+              <div class="val">14 Days</div>
+              <div class="lbl">Appliance Downtime Saved</div>
+            </div>
+            <div class="roi-metric">
+              <div class="val">96%</div>
+              <div class="lbl">Stocked First-Time Fix Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Ring Smart Arrival Access Simulator -->
+      <div class="tab-content" id="tab-ring">
+        <div class="tab-intro">
+          <strong>Ring Temporary Access Controller:</strong>
+          Time-bounded single-entry arrival window provisioned during Alexa+ UCP checkout. Confirms technician identity via front door camera.
+        </div>
+
+        <div class="ring-status-card" id="ring-window-status">
+          <div class="ring-header">
+            <div class="ring-title">
+              <span class="ring-icon">📹</span>
+              <span>Front Door Cam (device_front_door_01)</span>
+            </div>
+            <span class="badge-armed" id="ring-badge-status">ARMED • PENDING ARRIVAL</span>
+          </div>
+          <div class="ring-details" id="ring-window-details">
+            <div><strong>Technician:</strong> Marcus Vance (Apex Home Services Van #4)</div>
+            <div><strong>Arrival Window:</strong> 14:00 – 15:30 UTC</div>
+            <div><strong>Security Policy:</strong> MONITORED_SINGLE_ENTRY (Temporary PIN / Camera ID)</div>
+          </div>
+
+          <div class="ring-actions">
+            <button class="btn-ring-action grant" id="btn-sim-verified-arrival">
+              ✓ Simulate Verified Tech Arrival (Marcus Vance)
+            </button>
+            <button class="btn-ring-action deny" id="btn-sim-unverified-arrival">
+              ✗ Simulate Unverified Intruder Attempt
+            </button>
+          </div>
+        </div>
+
+        <div class="audit-log-card">
+          <div class="audit-log-title">Immutable Ring Arrival Audit Trail</div>
+          <div class="table-container">
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Camera</th>
+                  <th>Technician</th>
+                  <th>Status</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody id="ring-audit-tbody">
+                <tr><td colspan="5" style="text-align:center; color:#6b7280;">No arrival events recorded yet. Click simulation buttons above.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: MCP & Agent Protocol Trace -->
+      <div class="tab-content" id="tab-protocol">
+        <div class="tab-intro">
+          <strong>Autonomous Agent Reasoning Trace:</strong>
+          Step-by-step trace showing deterministic tool execution, sub-35ms latencies, and protocol compliance.
+        </div>
+
+        <div class="reasoning-trace-list" id="reasoning-trace-container">
+          <div class="trace-empty">Run an orchestration scenario to inspect step-by-step agent trace.</div>
+        </div>
+
+        <div class="protocol-inspector-card">
+          <div class="inspector-header">
+            <span>UCP Idempotency & Conflict Engine</span>
+            <button class="btn-test-idemp" id="btn-test-idempotency">
+              Test 24h Idempotency Replay (409 Conflict Check)
+            </button>
+          </div>
+          <div class="inspector-result" id="idemp-result">Click button above to verify UCP Idempotency-Key caching.</div>
+        </div>
+
+        <div class="discovery-links-card">
+          <div class="discovery-title">Protocol Discovery Profiles:</div>
+          <div class="links-row">
+            <a href="/.well-known/oauth-authorization-server" target="_blank" class="link-pill">OAuth 2.1 AS</a>
+            <a href="/.well-known/oauth-protected-resource" target="_blank" class="link-pill">RFC 9728 Protected Resource</a>
+            <a href="/.well-known/ucp" target="_blank" class="link-pill">UCP Profile</a>
+            <a href="/health" target="_blank" class="link-pill">Health & Telemetry</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -18,6 +18,11 @@ import {
   validateExtractedPlate,
 } from '../ai/ratingPlateVision.js';
 import { runFirstFixAgentWorkflow } from '../ai/firstFixAgent.js';
+import {
+  renderDiagnosticIntakeHtml,
+  renderStockedProCarouselHtml,
+  renderEmergencyShutoffHtml,
+} from '../mcp/uiTemplates.js';
 
 export interface AppOptions {
   publicBaseUrl?: string;
@@ -31,9 +36,15 @@ export function createApp(options: AppOptions = {}): Express {
   app.use(cors());
   app.use(express.json());
 
-  // Static assets for Alexa+ storeListing icons
+  // Static assets for Alexa+ storeListing icons and Web Simulator
   const assetsDir = path.resolve(process.cwd(), 'addon-package', 'assets');
+  const publicDir = path.resolve(process.cwd(), 'public');
   app.use('/assets', express.static(assetsDir));
+  app.use(express.static(publicDir));
+
+  app.get('/simulator', (_req: Request, res: Response) => {
+    res.sendFile(path.join(publicDir, 'index.html'));
+  });
 
   // --------------------------------------------------------------------------
   // Discovery & Protocol Profiles
@@ -104,6 +115,45 @@ export function createApp(options: AppOptions = {}): Express {
     } catch (err) {
       console.error('[AI Orchestrator Error]', err);
       res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // --------------------------------------------------------------------------
+  // Sprint 4: Fleet Console, Interactive MCP Apps & Simulator Endpoints
+  // --------------------------------------------------------------------------
+  app.post('/api/demo/reset', (_req: Request, res: Response) => {
+    appState.resetAppState();
+    res.json({
+      status: 'reset_complete',
+      timestamp: new Date().toISOString(),
+    });
+  });
+
+  app.get('/api/fleet/status', (_req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({
+      vans: appState.vans,
+      appointments: Array.from(appState.appointments.values()),
+      ucpSessions: Array.from(appState.ucpSessions.values()),
+      ringAccessWindows: Array.from(appState.ringAccessWindows.values()),
+      ringAuditLogs: appState.ringAuditLogs,
+      telemetry: appState.getTelemetry(),
+    });
+  });
+
+  app.get('/api/mcp-apps/:appName', (req: Request, res: Response) => {
+    const appName = req.params.appName;
+    const q = req.query as any;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+
+    if (appName === 'diagnostic-intake.html' || appName === 'diagnostic-intake') {
+      res.send(renderDiagnosticIntakeHtml(q));
+    } else if (appName === 'stocked-pro-carousel.html' || appName === 'stocked-pro-carousel') {
+      res.send(renderStockedProCarouselHtml(q));
+    } else if (appName === 'emergency-shutoff.html' || appName === 'emergency-shutoff') {
+      res.send(renderEmergencyShutoffHtml(q));
+    } else {
+      res.status(404).send('<h1>MCP App UI Resource Not Found</h1>');
     }
   });
 

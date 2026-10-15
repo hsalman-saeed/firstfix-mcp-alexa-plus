@@ -164,6 +164,10 @@ export class FirstFixStateManager {
     this.ringAccessEvents = 0;
   }
 
+  public resetAppState(): void {
+    this.reset();
+  }
+
   public recordMcpCall(latencyMs: number, preventedTruckRoll = false): void {
     this.totalMcpCalls++;
     this.totalLatencyMs += latencyMs;
@@ -239,3 +243,7 @@ export class FirstFixStateManager {
 }
 
 export const appState = new FirstFixStateManager();
+
+export function resetAppState(): void {
+  appState.reset();
+}

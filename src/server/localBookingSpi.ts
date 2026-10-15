@@ -183,6 +183,7 @@ localBookingRouter.post(
       updatedAtIso: new Date().toISOString(),
     };
 
+    appState.holdPartOnVan(van.vanId, oemPartSku);
     appState.appointments.set(appointmentId, appt);
 
     res.status(201).json({

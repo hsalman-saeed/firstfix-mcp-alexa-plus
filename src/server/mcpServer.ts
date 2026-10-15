@@ -12,6 +12,11 @@ import {
 } from '../engine/firstFixEngine.js';
 import { defaultStorage } from '../storage/storageAdapter.js';
 import { appState, AppointmentRecord } from './state.js';
+import {
+  renderDiagnosticIntakeHtml,
+  renderStockedProCarouselHtml,
+  renderEmergencyShutoffHtml,
+} from '../mcp/uiTemplates.js';
 
 export function createFirstFixMcpServer(): McpServer {
   const server = new McpServer({
@@ -19,7 +24,7 @@ export function createFirstFixMcpServer(): McpServer {
     version: '1.0.0',
   });
 
-  // 1. Register App Resource: Diagnostic Intake UI Scaffold
+  // 1. Register App Resource: Diagnostic Intake UI
   registerAppResource(
     server,
     'firstfix-diagnostic-intake-ui',
@@ -30,34 +35,13 @@ export function createFirstFixMcpServer(): McpServer {
         {
           uri: uri.href,
           mimeType: RESOURCE_MIME_TYPE,
-          text: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>FirstFix Diagnostic Intake</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 24px; }
-    .card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid #334155; }
-    h2 { color: #38bdf8; margin-top: 0; }
-    .badge { background: #0369a1; color: #e0f2fe; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h2>FirstFix Multimodal Diagnostic Intake</h2>
-      <span class="badge">Alexa+ MCP Streamable</span>
-    </div>
-    <p>Scan rating plate or provide machine serial number to trigger 100% deterministic OEM BOM matching and zero-tool 90-second safety pre-checks.</p>
-  </div>
-</body>
-</html>`,
+          text: renderDiagnosticIntakeHtml(),
         },
       ],
     })
   );
 
-  // 2. Register App Resource: Stocked-Pro Carousel UI Scaffold
+  // 2. Register App Resource: Stocked-Pro Carousel UI
   registerAppResource(
     server,
     'firstfix-stocked-pro-carousel-ui',
@@ -68,25 +52,24 @@ export function createFirstFixMcpServer(): McpServer {
         {
           uri: uri.href,
           mimeType: RESOURCE_MIME_TYPE,
-          text: `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>FirstFix Stocked-Pro Carousel</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; padding: 24px; }
-    .card { background: #1e293b; border-radius: 12px; padding: 20px; border: 1px solid #334155; }
-    h2 { color: #10b981; margin-top: 0; }
-    .van-item { border-left: 4px solid #10b981; padding-left: 12px; margin: 12px 0; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h2>Verified Stocked Local Contractors</h2>
-    <p>Only technicians with verified, physical truck-stock of your machine's exact OEM part are displayed below. Guaranteed no second truck rolls ($165 savings).</p>
-  </div>
-</body>
-</html>`,
+          text: renderStockedProCarouselHtml(),
+        },
+      ],
+    })
+  );
+
+  // 3. Register App Resource: Emergency Shutoff Protocol UI
+  registerAppResource(
+    server,
+    'firstfix-emergency-shutoff-ui',
+    'ui://firstfix/emergency-shutoff.html',
+    {},
+    async (uri: any) => ({
+      contents: [
+        {
+          uri: uri.href,
+          mimeType: RESOURCE_MIME_TYPE,
+          text: renderEmergencyShutoffHtml(),
         },
       ],
     })
