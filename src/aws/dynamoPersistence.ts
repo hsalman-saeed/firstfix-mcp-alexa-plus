@@ -1,4 +1,4 @@
-import { DynamoDBClient, DescribeTableCommand, PutItemCommand, GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, DescribeTableCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 
 export interface DynamoPersistenceStatus {
   status: 'connected_us_east_1' | 'in_memory_fallback';

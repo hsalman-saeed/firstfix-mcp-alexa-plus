@@ -83,8 +83,8 @@ LLMs frequently hallucinate mechanical part numbers or confuse revision numbers.
 |---|---|---|---|---|
 | **Bosch Dishwasher** (Error `E24` Won't Drain) | `FD99000000` to `FD99999999` (2019+ Batch) | Bosch 3-Prong Brushless DC (BLDC) Pump | `BOSCH-00631200` ($42.00) | **Newer BLDC chassis.** Fitting legacy AC pump causes direct electronic control module burnout. |
 | **Bosch Dishwasher** (Error `E24` Won't Drain) | `FD97000000` to `FD98999999` (2017–2018 Batch) | Bosch Legacy Twist-Lock Bayonet AC Pump | `BOSCH-00611332` ($46.00) | **Legacy chassis.** Fitting newer BLDC pump fails mechanically due to incompatible bayonet mount. |
-| **Rheem Gas Water Heater** (Flashing 7-Flash Code) | `M012200000`+ (Post-Jan 2022 Resettable) | Rheem Resettable Resistor FV Sensor | `RHEEM-SP20245` ($38.50) | **Resettable probe.** Replacing with older thermal fuse prevents auto-recovery. |
-| **Rheem Gas Water Heater** (Flashing 7-Flash Code) | Prior to `M012200000` (Pre-2022 One-Time Fuse) | Rheem One-Shot Thermal Cutoff Fuse | `RHEEM-SP14255` ($29.00) | **One-time sacrificial link.** Fitting resettable probe breaches factory UL fire listing. |
+| **Rheem Gas Water Heater** (Status LED `4_FLASHES`) | `M0122` to `M5226` (Post-2022 Solid-State) | Flammable Vapor (FV) Sensor & Harness Kit | `RHEEM-SP20172` ($34.00) | **Keyed 3-pin harness.** Older 2-pin sensors fail to communicate with Honeywell gas valve. |
+| **Rheem Gas Water Heater** (Status LED `4_FLASHES`) | `M0115` to `M5221` (Pre-2022 Fusible Link) | Legacy Thermal Cutoff Switch & Pilot Assembly | `RHEEM-SP20170` ($38.00) | **Fusible glass thermal switch.** Fitting the updated solid-state sensor bypasses sealed burner door integration. |
 
 ---
 
@@ -212,8 +212,8 @@ cp .env.example .env
 
 ### 3. Start Local Development Server
 ```bash
-npm run dev
-# Server opens at http://localhost:3001 with live reload
+npm start
+# Server opens at http://localhost:3001
 ```
 
 ### 4. Deploy Live to AWS (1-Command Automation)
