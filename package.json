@@ -5,12 +5,14 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "dev": "tsx src/server/start.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test tests/*.test.ts",
+    "test:coverage": "node --import tsx --experimental-test-coverage --test tests/*.test.ts",
     "test:bedrock": "tsx src/scripts/testLiveBedrock.ts",
     "deploy:aws": "tsx src/scripts/deployAwsLive.ts",
-    "start": "tsx src/index.ts"
+    "start": "tsx src/server/start.ts"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1152.0",

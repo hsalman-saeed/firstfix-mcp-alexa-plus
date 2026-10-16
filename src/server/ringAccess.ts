@@ -16,6 +16,14 @@ ringRouter.use((req: Request, res: Response, next) => {
  * Arms a verified technician arrival window
  */
 ringRouter.post('/v1/ring/access-windows', (req: Request, res: Response) => {
+  if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+    res.status(400).json({
+      code: 'invalid_payload',
+      message: 'Request body must be a valid JSON object.',
+    });
+    return;
+  }
+
   const {
     appointmentId,
     correlationToken,
@@ -71,6 +79,22 @@ ringRouter.post('/v1/ring/access-windows', (req: Request, res: Response) => {
  * Simulates a Ring doorbell event & verifies correlation token for monitored entry
  */
 ringRouter.post('/v1/ring/simulate-arrival', (req: Request, res: Response) => {
+  if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+    res.status(400).json({
+      code: 'invalid_payload',
+      message: 'Request body must be a valid JSON object.',
+    });
+    return;
+  }
+
+  if (!req.body.correlationToken && !req.body.windowId) {
+    res.status(400).json({
+      code: 'missing_parameters',
+      message: 'Either correlationToken or windowId must be provided for arrival simulation.',
+    });
+    return;
+  }
+
   const {
     correlationToken,
     windowId,

@@ -47,7 +47,9 @@ export interface AgentWorkflowInput {
   samplePlateId?: string;
   imageBase64?: string;
   imageMimeType?: 'image/jpeg' | 'image/png' | 'image/webp';
+  forceLiveBedrock?: boolean;
   zipCode?: string;
+  preferredDateIso?: string;
   householdId?: string;
   userConfirmedSerial?: boolean;
   autoReserveFirstSlot?: boolean;
@@ -207,6 +209,7 @@ export async function runFirstFixAgentWorkflow(input: AgentWorkflowInput): Promi
     samplePlateId: input.samplePlateId,
     imageBase64: input.imageBase64,
     imageMimeType: input.imageMimeType,
+    forceLiveBedrock: input.forceLiveBedrock,
     rawText: input.userUtterance,
     userConfirmedSerial: input.userConfirmedSerial,
   });
@@ -292,7 +295,7 @@ export async function runFirstFixAgentWorkflow(input: AgentWorkflowInput): Promi
   const vanMatchResult = matchStockedContractorSlots({
     oemPartSku,
     zipCode,
-    preferredDateIso: '2026-10-15',
+    preferredDateIso: input.preferredDateIso || '2026-10-15',
   });
   const s4Latency = Math.round(performance.now() - t3);
 
@@ -315,7 +318,7 @@ export async function runFirstFixAgentWorkflow(input: AgentWorkflowInput): Promi
 
   if (input.autoReserveFirstSlot && vanMatchResult.recommendedSlots.length > 0) {
     const chosenSlot = vanMatchResult.recommendedSlots[0];
-    appState.holdPartOnVan(chosenSlot.vanId, oemPartSku);
+    appState.holdPartOnVan(chosenSlot.vanId, oemPartSku, vanMatchResult.correlationToken);
 
     const appointmentId = `appt_orch_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
     const startTimeIso = `2026-10-15T${chosenSlot.startTime}:00Z`;

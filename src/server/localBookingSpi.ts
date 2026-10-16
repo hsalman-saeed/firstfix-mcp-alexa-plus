@@ -183,7 +183,7 @@ localBookingRouter.post(
       updatedAtIso: new Date().toISOString(),
     };
 
-    appState.holdPartOnVan(van.vanId, oemPartSku);
+    appState.holdPartOnVan(van.vanId, oemPartSku, correlationToken);
     appState.appointments.set(appointmentId, appt);
 
     res.status(201).json({
@@ -274,7 +274,7 @@ localBookingRouter.delete(
     appt.updatedAtIso = new Date().toISOString();
 
     if (appt.partHeld) {
-      appState.releasePartOnVan(appt.vanId, appt.oemPartSku);
+      appState.releasePartOnVan(appt.vanId, appt.oemPartSku, appt.correlationToken);
       appt.partHeld = false;
     }
 

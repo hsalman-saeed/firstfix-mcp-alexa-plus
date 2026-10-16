@@ -2,7 +2,7 @@
 name: firstfix-dispatch-skill
 description: Deterministic pre-dispatch residential appliance, HVAC, and plumbing diagnostic skill for Alexa+ and agent hosts. Triggers when a homeowner reports equipment failures, error codes, strange noises, leaks, or cooling/heating loss. Resolves machine rating plate serial-variant bill-of-materials (BOM) to identify exact OEM part numbers, performs instant safety hazard screening, provides zero-tool 90-second DIY pre-checks, queries local contractor van inventory to eliminate second truck rolls, orchestrates UCP diagnostic fee checkout, and schedules verified Ring arrival access.
 license: MIT
-compatibility: Designed for Alexa+ MCP hosts, AWS Strands Agents, and Kiro Crew
+compatibility: Designed for Alexa+ MCP hosts, Amazon Bedrock Nova Pro runtimes, and Agent Skills engines
 metadata:
   author: firstfix-mcp
   version: 1.0.0

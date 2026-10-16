@@ -16,6 +16,26 @@ ucpRouter.use((req: Request, res: Response, next) => {
  * Initiates an Alexa+ UCP checkout session for the diagnostic deposit
  */
 ucpRouter.post('/checkout-sessions', (req: Request, res: Response) => {
+  // Runtime validation (Finding S-3)
+  if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+    res.status(400).json({
+      code: 'invalid_payload',
+      message: 'Request body must be a valid JSON object.',
+    });
+    return;
+  }
+
+  if (
+    req.body.diagnosticFeeUsd !== undefined &&
+    (typeof req.body.diagnosticFeeUsd !== 'number' || req.body.diagnosticFeeUsd < 0 || isNaN(req.body.diagnosticFeeUsd))
+  ) {
+    res.status(400).json({
+      code: 'invalid_diagnostic_fee',
+      message: 'diagnosticFeeUsd must be a non-negative number.',
+    });
+    return;
+  }
+
   const idempotencyKey = req.headers['idempotency-key'] as string | undefined;
 
   if (idempotencyKey) {
@@ -316,7 +336,7 @@ ucpRouter.post('/checkout-sessions/:id/cancel', (req: Request, res: Response) =>
   if (appt) {
     appt.status = 'CANCELLED';
     if (appt.partHeld) {
-      appState.releasePartOnVan(appt.vanId, appt.oemPartSku);
+      appState.releasePartOnVan(appt.vanId, appt.oemPartSku, appt.correlationToken || session.correlationToken);
       appt.partHeld = false;
     }
   }

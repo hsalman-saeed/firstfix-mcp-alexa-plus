@@ -804,3 +804,490 @@ body {
   border-color: #38bdf8;
   background: rgba(56, 189, 248, 0.1);
 }
+
+/* ==========================================================================
+   SPRINT 7 FLAGSHIP UI/UX STYLING ENHANCEMENTS
+   ========================================================================== */
+
+/* Toast Notification System */
+.toast-container {
+  position: fixed;
+  top: 72px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  min-width: 300px;
+  max-width: 440px;
+  background: rgba(13, 21, 38, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 12px rgba(0, 202, 255, 0.2);
+  color: #fff;
+  font-size: 13px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: toast-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: all 0.3s ease;
+}
+
+.toast.toast-fadeout {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.toast-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.toast-body { flex: 1; }
+.toast-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+.toast-msg { font-size: 12px; color: #cbd5e1; line-height: 1.4; }
+
+.toast.success { border-left: 4px solid var(--green); }
+.toast.success .toast-title { color: var(--green); }
+.toast.error { border-left: 4px solid var(--red); }
+.toast.error .toast-title { color: var(--red); }
+.toast.warning { border-left: 4px solid var(--amber); }
+.toast.warning .toast-title { color: var(--amber); }
+.toast.info { border-left: 4px solid var(--cyan); }
+.toast.info .toast-title { color: var(--cyan); }
+
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Badge Enhancements */
+.badge-oauth {
+  background: rgba(99, 102, 241, 0.18);
+  border: 1px solid #818cf8;
+  color: #c7d2fe;
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+/* Echo Show 15 Physical Hardware Bezel */
+.echo-show-bezel {
+  background: #11141c;
+  border: 10px solid #232a38;
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bezel-top-bar {
+  background: #19202e;
+  padding: 6px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #2a3547;
+}
+
+.bezel-camera-housing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bezel-camera {
+  width: 12px;
+  height: 12px;
+  background: #000;
+  border: 2px solid #334155;
+  border-radius: 50%;
+  box-shadow: inset 0 0 4px rgba(0, 202, 255, 0.5);
+}
+
+.camera-led {
+  width: 7px;
+  height: 7px;
+  background: #475569;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.camera-led.active {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.ambient-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.ambient-time { font-weight: 700; color: #fff; }
+.ambient-device { color: #64748b; }
+.ambient-badge {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.ambient-aws-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #6ee7b7;
+}
+
+.status-dot-green {
+  width: 6px;
+  height: 6px;
+  background: #10b981;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 6px #10b981;
+}
+
+/* Rating Plate Vision Uploader Card */
+.vision-uploader-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+}
+
+.uploader-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.uploader-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.badge-bedrock {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.uploader-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-upload {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-card);
+  color: var(--cyan);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-upload:hover { border-color: var(--cyan); background: rgba(0, 202, 255, 0.1); }
+.upload-filename { font-size: 11px; color: #94a3b8; font-family: monospace; flex: 1; }
+
+.toggle-bedrock-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #f59e0b;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.bedrock-telemetry-badge {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #38bdf8;
+  background: rgba(0, 202, 255, 0.08);
+  border: 1px dashed rgba(0, 202, 255, 0.3);
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: flex;
+  gap: 8px;
+}
+
+/* FSM Webhook Feed Card */
+.fsm-webhook-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.fsm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.fsm-title { font-size: 14px; font-weight: 700; color: #fff; display: block; }
+.fsm-sub { font-size: 11px; color: #94a3b8; }
+
+.btn-test-fsm {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.btn-test-fsm:hover { background: var(--green); color: #04101e; }
+
+.fsm-table, .dynamo-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.fsm-table th, .dynamo-table th {
+  background: #0d1526;
+  color: #94a3b8;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-card);
+}
+
+.fsm-table td, .dynamo-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #162035;
+  color: #e2e8f0;
+}
+
+/* Simulated Ring Battery Doorbell Pro HD Card */
+.ring-camera-feed-card {
+  background: #030712;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.camera-feed-header {
+  background: rgba(15, 23, 42, 0.9);
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.feed-live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.rec-dot {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: pulse-rec 1.2s infinite;
+}
+
+@keyframes pulse-rec {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.feed-device-tag { color: #94a3b8; font-family: monospace; }
+
+.camera-viewport {
+  height: 180px;
+  background: linear-gradient(135deg, #090e1a 0%, #172554 50%, #0b1329 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.camera-tech-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.tech-card-sim {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 202, 255, 0.4);
+  padding: 10px 16px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 0 20px rgba(0, 202, 255, 0.2);
+}
+
+.tech-sim-avatar { font-size: 32px; }
+.tech-sim-name { font-weight: 800; font-size: 14px; color: #fff; }
+.tech-sim-co { font-size: 11px; color: #94a3b8; }
+.tech-sim-badge { font-size: 11px; color: var(--green); font-weight: 600; margin-top: 2px; }
+
+.camera-scanner-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  box-shadow: 0 0 8px var(--cyan);
+  animation: scan-pass 3s infinite linear;
+}
+
+@keyframes scan-pass {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* OAuth 2.1 Security Lab Button */
+.btn-test-oauth {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid #818cf8;
+  color: #c7d2fe;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.btn-test-oauth:hover { background: #6366f1; color: #fff; }
+
+/* AWS Architecture Status Cards */
+.aws-arch-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.aws-arch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.badge-live-aws {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.aws-arch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.aws-component-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-card);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.comp-icon { font-size: 20px; color: var(--cyan); margin-bottom: 4px; }
+.comp-title { font-weight: 700; font-size: 13px; color: #fff; margin-bottom: 4px; }
+.comp-detail { font-size: 11px; color: #94a3b8; font-family: monospace; word-break: break-all; margin-bottom: 6px; }
+.comp-status { font-size: 11px; font-weight: 600; }
+.comp-status.green { color: var(--green); }
+
+/* DynamoDB Live Inspector */
+.dynamo-inspector-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.dynamo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dynamo-title { font-size: 14px; font-weight: 700; color: #fff; display: block; }
+.dynamo-sub { font-size: 11px; color: #94a3b8; }
+
+.btn-query-dynamo {
+  background: rgba(0, 202, 255, 0.15);
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.btn-query-dynamo:hover { background: var(--cyan); color: #04101e; }
+
+/* Van inventory quantity decrement flash */
+.flash-decrement {
+  animation: flash-highlight 1.5s ease-out;
+}
+
+@keyframes flash-highlight {
+  0% { background: rgba(245, 158, 11, 0.4); }
+  100% { background: transparent; }
+}
+

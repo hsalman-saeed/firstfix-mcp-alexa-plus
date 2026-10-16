@@ -5,7 +5,8 @@
 [![Amazon Bedrock](https://img.shields.io/badge/Amazon_Bedrock-Nova_Pro_Vision-232F3E?logo=amazon&logoColor=white)](https://aws.amazon.com/bedrock/)
 [![MCP 2025-11-25](https://img.shields.io/badge/MCP-2025--11--25_Streamable_HTTP-0A84FF)](https://modelcontextprotocol.io/)
 [![UCP 2026-01-11](https://img.shields.io/badge/UCP-2026--01--11_Checkout-00C7BE)](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/ucp)
-[![Tests Passing](https://img.shields.io/badge/Tests-60%2F60_Passing-34C759)](tests/)
+[![OAuth 2.1 PKCE](https://img.shields.io/badge/OAuth_2.1-RFC_7636_PKCE_S256-blueviolet)](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/oauth-authorization-server)
+[![Tests Passing](https://img.shields.io/badge/Tests-75%2F75_Passing-34C759)](tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **Amazon Developer Hackathon 2026 Entry**  
@@ -23,8 +24,11 @@ Judges can test the fully deployed system immediately over public HTTPS with zer
 
 | Target Component | Live Cloud URL / Method | Description |
 |---|---|---|
-| **Dual-Screen Echo Show 15 Simulator** | [👉 `GET /`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/) | Interactive multimodal simulator (Echo Show 15 + Contractor Fleet Matrix + Ring Doorbell) |
+| **Dual-Screen Echo Show 15 Simulator** | [👉 `GET /`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/) | Interactive multimodal simulator (Echo Show 15 + Contractor Fleet Matrix + Ring Doorbell + DynamoDB Inspector) |
 | **MCP 2025-11-25 Server** | `POST /mcp` | Streamable HTTP endpoint serving all 5 tools and 3 interactive UI resources |
+| **Live DynamoDB Records Read-Back** | [`GET /api/aws/dynamo-records`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/aws/dynamo-records) | Live inspection of real persisted items in `FirstFixMcpState` in `us-east-1` |
+| **Contractor FSM Webhook Feed** | [`GET /v1/fsm/dispatches`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/v1/fsm/dispatches) | Real-time B2B dispatch logs for ServiceTitan, Housecall Pro, and Jobber |
+| **OAuth 2.1 PKCE Authorization** | [`GET /oauth/authorize`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/oauth/authorize?response_type=code&client_id=judge_client&code_challenge=dBjftJeZ4CVP-mB92K27uhbUJu1p1r_wW1gFWFOEjXk&code_challenge_method=S256&format=json) | RFC 7636 PKCE S256 authorization code exchange |
 | **UCP Discovery Manifest** | [`GET /.well-known/ucp`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/ucp) | Universal Commerce Protocol (`2026-01-11`) capability profile |
 | **OAuth 2.1 Server Metadata** | [`GET /.well-known/oauth-authorization-server`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/oauth-authorization-server) | RFC 8414 & RFC 9728 discovery metadata |
 | **Live AWS Architecture Health** | [`GET /api/health`](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/health) | Live telemetry (`us-east-1`, `FirstFixMcpState`, `us.amazon.nova-pro-v1:0`) |
@@ -37,26 +41,29 @@ curl -X POST https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aw
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":"judge-list-test","method":"tools/list"}'
 
-# 2. Execute deterministic serial-variant BOM diagnosis (Bosch FD99 -> BOSCH-00631200 BLDC Pump)
+# 2. Execute deterministic serial-variant BOM diagnosis (Carrier AC 24ACC636 -> CARRIER-HC98JA045D Capacitor)
 curl -X POST https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/mcp \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
-    "id": "judge-diag-test",
+    "id":"judge-carrier-diag",
     "method": "tools/call",
     "params": {
       "name": "diagnose_equipment_and_bom",
       "arguments": {
-        "brand": "Bosch",
-        "modelNumber": "SHPM65Z55N/01",
-        "serialNumber": "FD991001234",
-        "errorCode": "E24"
+        "brand": "Carrier",
+        "modelNumber": "24ACC636A003",
+        "serialNumber": "2023W19482",
+        "errorCode": "E4"
       }
     }
   }'
 
-# 3. Check live AWS architecture status and DynamoDB connection
-curl https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/aws/architecture-status
+# 3. Query live Amazon DynamoDB (FirstFixMcpState) records in us-east-1
+curl https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/aws/dynamo-records
+
+# 4. Query live B2B contractor FSM webhook dispatches (ServiceTitan / Jobber)
+curl https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/v1/fsm/dispatches
 ```
 
 ---

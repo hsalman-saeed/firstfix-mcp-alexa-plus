@@ -24,7 +24,22 @@ import {
   renderEmergencyShutoffHtml,
 } from '../mcp/uiTemplates.js';
 
-import { getDynamoStatus, persistRecordAsync } from '../aws/dynamoPersistence.js';
+import {
+  getDynamoStatus,
+  persistRecordAsync,
+  fetchRecentDynamoRecords,
+  clearDemoRecordsInDynamoDB,
+} from '../aws/dynamoPersistence.js';
+import {
+  oauthRouter,
+  createOAuth21ValidationMiddleware,
+} from './oauthServer.js';
+import {
+  fsmRouter,
+  getFsmDispatches,
+  clearFsmDispatches,
+  recordFsmDispatch,
+} from './fsmWebhook.js';
 
 export interface AppOptions {
   publicBaseUrl?: string;
@@ -59,6 +74,16 @@ export function createApp(options: AppOptions = {}): Express {
   app.get('/simulator', (_req: Request, res: Response) => {
     res.sendFile(path.join(publicDir, 'index.html'));
   });
+
+  app.get('/favicon.ico', (_req: Request, res: Response) => {
+    res.status(204).end();
+  });
+
+  // OAuth 2.1 PKCE Authorization Server (Gap G-4)
+  app.use(oauthRouter);
+
+  // Contractor B2B Field Service Management (FSM) Webhook Feed (Gap G-8)
+  app.use(fsmRouter);
 
   // --------------------------------------------------------------------------
   // Discovery & Protocol Profiles (Dynamic Base URL)
@@ -113,6 +138,17 @@ export function createApp(options: AppOptions = {}): Express {
     res.json(getHealthPayload(req));
   });
 
+  // Gap G-5: Live Amazon DynamoDB (FirstFixMcpState) records inspector
+  app.get('/api/aws/dynamo-records', async (_req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+      const records = await fetchRecentDynamoRecords(50);
+      res.json(records);
+    } catch (err: any) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
   app.get('/api/telemetry', (_req: Request, res: Response) => {
     res.setHeader('Cache-Control', 'no-store');
     res.json(appState.getTelemetry());
@@ -150,6 +186,22 @@ export function createApp(options: AppOptions = {}): Express {
       const preventedTruckRoll =
         result.status === 'slot_reserved' || result.status === 'ready_for_booking';
       appState.recordMcpCall(latency, preventedTruckRoll);
+
+      // Auto-dispatch contractor FSM webhook when slot is reserved (Gap G-8)
+      if (result.reservation) {
+        recordFsmDispatch({
+          contractorId: result.reservation.vanId.includes('apex') ? 'contractor_apex_04' : 'contractor_precision_01',
+          companyName: result.reservation.vanId.includes('apex') ? 'Apex Home Services' : 'Precision Trade Pros',
+          vanId: result.reservation.vanId,
+          technicianName: result.reservation.technicianName,
+          appointmentId: result.reservation.appointmentId,
+          preDiagnosedOemSku: result.reservation.oemPartSku || 'BOSCH-00631200',
+          serialVariantRule: result.bomResolution?.serialVariantRuleApplied || 'Factory OEM Match',
+          ucpDepositPaidUsd: result.reservation.diagnosticFeeUsd,
+          correlationToken: result.correlationToken || result.reservation.correlationToken,
+        });
+      }
+
       res.json(result);
     } catch (err) {
       console.error('[AI Orchestrator Error]', err);
@@ -162,6 +214,8 @@ export function createApp(options: AppOptions = {}): Express {
   // --------------------------------------------------------------------------
   app.post('/api/demo/reset', (_req: Request, res: Response) => {
     appState.resetAppState();
+    clearFsmDispatches();
+    clearDemoRecordsInDynamoDB().catch(() => {});
     res.json({
       status: 'reset_complete',
       timestamp: new Date().toISOString(),
@@ -176,6 +230,7 @@ export function createApp(options: AppOptions = {}): Express {
       ucpSessions: Array.from(appState.ucpSessions.values()),
       ringAccessWindows: Array.from(appState.ringAccessWindows.values()),
       ringAuditLogs: appState.ringAuditLogs,
+      fsmDispatches: getFsmDispatches(),
       telemetry: appState.getTelemetry(),
       dynamoDb: getDynamoStatus(),
     });
@@ -197,10 +252,13 @@ export function createApp(options: AppOptions = {}): Express {
     }
   });
 
+  // OAuth 2.1 Protected Resource Validation Middleware
+  const oauthProtection = createOAuth21ValidationMiddleware(baseUrl);
+
   // --------------------------------------------------------------------------
   // Self-Hosted MCP 2025-11-25 Streamable HTTP Endpoint (/mcp)
   // --------------------------------------------------------------------------
-  app.all('/mcp', async (req: Request, res: Response) => {
+  app.all('/mcp', oauthProtection, async (req: Request, res: Response) => {
     // Ensure required Accept header per Streamable HTTP specification
     const currentAccept = req.headers['accept'] || '';
     if (!currentAccept.includes('application/json') || !currentAccept.includes('text/event-stream')) {
@@ -232,11 +290,11 @@ export function createApp(options: AppOptions = {}): Express {
   });
 
   // --------------------------------------------------------------------------
-  // Sub-Routers
+  // Sub-Routers with OAuth 2.1 protection
   // --------------------------------------------------------------------------
-  app.use(ucpRouter);
-  app.use(localBookingRouter);
-  app.use(ringRouter);
+  app.use(oauthProtection, ucpRouter);
+  app.use(oauthProtection, localBookingRouter);
+  app.use(oauthProtection, ringRouter);
 
   return app;
 }

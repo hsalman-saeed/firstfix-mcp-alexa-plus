@@ -137,6 +137,7 @@ export class FirstFixStateManager {
   public idempotencyCache: Map<string, IdempotencyRecord> = new Map();
   public ringAccessWindows: Map<string, RingAccessWindow> = new Map();
   public ringAuditLogs: RingArrivalLog[] = [];
+  private activePartHolds = new Set<string>();
 
   // Telemetry metrics
   public totalMcpCalls = 0;
@@ -157,6 +158,7 @@ export class FirstFixStateManager {
     this.idempotencyCache.clear();
     this.ringAccessWindows.clear();
     this.ringAuditLogs = [];
+    this.activePartHolds.clear();
     this.totalMcpCalls = 0;
     this.totalLatencyMs = 0;
     this.preventedTruckRollsCount = 0;
@@ -166,6 +168,10 @@ export class FirstFixStateManager {
 
   public resetAppState(): void {
     this.reset();
+  }
+
+  public getVans(): ContractorVan[] {
+    return this.vans;
   }
 
   public recordMcpCall(latencyMs: number, preventedTruckRoll = false): void {
@@ -222,20 +228,35 @@ export class FirstFixStateManager {
     });
   }
 
-  // Stock hold / decrement helper
-  public holdPartOnVan(vanId: string, oemPartSku: string): boolean {
+  // Stock hold / decrement helper with correlationToken idempotency (Finding F-4)
+  public holdPartOnVan(vanId: string, oemPartSku: string, correlationToken?: string): boolean {
+    const normSku = oemPartSku.toUpperCase();
+    if (correlationToken) {
+      const holdKey = `${correlationToken}:${vanId}:${normSku}`;
+      if (this.activePartHolds.has(holdKey)) {
+        return true; // Already held for this correlation token; do not decrement a second time
+      }
+    }
     const van = this.vans.find((v) => v.vanId === vanId);
     if (!van) return false;
-    const item = van.inventory.find((i) => i.oemPartSku.toUpperCase() === oemPartSku.toUpperCase());
+    const item = van.inventory.find((i) => i.oemPartSku.toUpperCase() === normSku);
     if (!item || item.quantity <= 0) return false;
     item.quantity -= 1;
+    if (correlationToken) {
+      this.activePartHolds.add(`${correlationToken}:${vanId}:${normSku}`);
+    }
     return true;
   }
 
-  public releasePartOnVan(vanId: string, oemPartSku: string): void {
+  public releasePartOnVan(vanId: string, oemPartSku: string, correlationToken?: string): void {
+    const normSku = oemPartSku.toUpperCase();
+    if (correlationToken) {
+      const holdKey = `${correlationToken}:${vanId}:${normSku}`;
+      this.activePartHolds.delete(holdKey);
+    }
     const van = this.vans.find((v) => v.vanId === vanId);
     if (!van) return;
-    const item = van.inventory.find((i) => i.oemPartSku.toUpperCase() === oemPartSku.toUpperCase());
+    const item = van.inventory.find((i) => i.oemPartSku.toUpperCase() === normSku);
     if (item) {
       item.quantity += 1;
     }

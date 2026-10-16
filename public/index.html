@@ -4,14 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FirstFix MCP — Dual-Screen Echo Show 15 Simulator & Contractor Fleet Console</title>
+  <!-- Inline SVG Favicon (Finding U-2) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23070B14'/%3E%3Cpath d='M30 70 L50 30 L70 70 Z' fill='none' stroke='%2300CAFF' stroke-width='8' stroke-linejoin='round'/%3E%3Ccircle cx='50' cy='60' r='6' fill='%2310B981'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+  <!-- Floating Toast Notifications Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
   <!-- Top Navigation & KPI Bar -->
   <header class="top-nav">
     <div class="brand">
-      <div class="brand-logo">🔧 FirstFix <span class="badge-mcp">MCP 2025-11-25</span></div>
-      <div class="brand-sub">Amazon Developer Hackathon 2026 • Dual-Track: Alexa+ & Ring</div>
+      <div class="brand-logo">🔧 FirstFix <span class="badge-mcp">MCP 2025-11-25</span> <span class="badge-oauth">OAuth 2.1 PKCE</span></div>
+      <div class="brand-sub">Amazon Developer Hackathon 2026 • Dual-Track: Alexa+ & Ring • Amazon Bedrock Nova Pro in us-east-1</div>
     </div>
 
     <div class="kpi-group">
@@ -25,7 +30,7 @@
       </div>
       <div class="kpi-pill">
         <span class="kpi-label">First-Visit Fix Rate</span>
-        <span class="kpi-val cyan">96% <small style="font-size:10px; color:#9ca3af;">(vs 63%)</small></span>
+        <span class="kpi-val cyan">96% <small style="font-size:10px; color:#94a3b8;">(vs 63%)</small></span>
       </div>
       <div class="kpi-pill">
         <span class="kpi-label">Avg Tool Latency</span>
@@ -34,6 +39,10 @@
       <div class="kpi-pill highlight">
         <span class="kpi-label">Bedrock Vision</span>
         <span class="kpi-val amber" id="kpi-bedrock">Nova Pro v1:0</span>
+      </div>
+      <div class="kpi-pill" id="token-telemetry-pill" style="display:none;">
+        <span class="kpi-label">Bedrock Tokens</span>
+        <span class="kpi-val cyan" id="token-count-display">0 tok</span>
       </div>
       <button class="btn-reset" id="btn-top-reset" title="Reset seed state, van inventory & appointments">
         🔄 Reset Demo State
@@ -48,7 +57,7 @@
       <div class="panel-header">
         <div class="panel-title">
           <span class="icon">📺</span>
-          <span>Alexa+ Echo Show 15 Device Simulator</span>
+          <span>Alexa+ Echo Show 15 Multimodal Simulator</span>
         </div>
         <div class="audio-controls">
           <button class="btn-audio" id="btn-toggle-speech" title="Toggle Web Speech TTS">
@@ -59,36 +68,52 @@
 
       <!-- Preset Scenarios -->
       <div class="scenario-bar">
-        <div class="scenario-label">1-CLICK DEMO SCENARIOS:</div>
+        <div class="scenario-label">1-CLICK JUDGE SCENARIOS:</div>
         <div class="scenario-buttons">
-          <button class="btn-scenario active" data-scenario="1">
+          <button class="btn-scenario active" data-scenario="1" title="Bosch FD99 serial 2019+ BLDC pump resolution">
             <span class="scenario-num">1</span>
             <span>Bosch FD99 Happy Path (98%)</span>
           </button>
-          <button class="btn-scenario" data-scenario="2">
+          <button class="btn-scenario" data-scenario="2" title="Bosch FD98 blurry rating plate requiring Echo Show screen confirmation">
             <span class="scenario-num">2</span>
-            <span>Bosch FD98 Blurry Plate (&lt;0.90 Gate)</span>
+            <span>Bosch FD98 Blurry (&lt;0.90 Gate)</span>
           </button>
-          <button class="btn-scenario" data-scenario="3">
+          <button class="btn-scenario" data-scenario="3" title="Rheem Water Heater Flammable Vapor sensor fault">
             <span class="scenario-num">3</span>
             <span>Rheem Water Heater FV Sensor</span>
           </button>
-          <button class="btn-scenario" data-scenario="4">
+          <button class="btn-scenario" data-scenario="4" title="Gas leak odor triggering instant emergency shutoff protocol">
             <span class="scenario-num">4</span>
             <span>Gas Leak Emergency Halt</span>
           </button>
-          <button class="btn-scenario" data-scenario="5">
+          <button class="btn-scenario" data-scenario="5" title="Adversarial prompt injection blocking and fee bypass defense">
             <span class="scenario-num">5</span>
             <span>Prompt-Injection Defense</span>
+          </button>
+          <button class="btn-scenario" data-scenario="6" title="Carrier Comfort AC 24ACC636 capacitor hum">
+            <span class="scenario-num">6</span>
+            <span>Carrier AC 24ACC636 (Capacitor)</span>
           </button>
         </div>
       </div>
 
-      <!-- Echo Show 15 Physical Bezel -->
+      <!-- Echo Show 15 Physical Hardware Bezel -->
       <div class="echo-show-bezel">
-        <div class="bezel-camera"></div>
+        <div class="bezel-top-bar">
+          <div class="bezel-camera-housing">
+            <div class="bezel-camera"></div>
+            <div class="camera-led" id="camera-led" title="Echo Show 15 Camera Active"></div>
+          </div>
+          <div class="ambient-status-bar">
+            <span class="ambient-time" id="ambient-clock">10:42 AM</span>
+            <span class="ambient-device">Kitchen Echo Show 15</span>
+            <span class="ambient-badge">🔐 PKCE S256 Active</span>
+            <span class="ambient-aws-status"><span class="status-dot-green"></span> AWS us-east-1 Live</span>
+          </div>
+        </div>
+
         <div class="echo-screen">
-          <!-- Voice Waveform & Transcript Bar -->
+          <!-- Voice Waveform & Spoken Transcript Bar -->
           <div class="echo-voice-bar">
             <div class="waveform" id="waveform">
               <span class="bar"></span><span class="bar"></span><span class="bar"></span>
@@ -96,11 +121,11 @@
               <span class="bar"></span><span class="bar"></span><span class="bar"></span>
             </div>
             <div class="transcript" id="voice-transcript">
-              "FirstFix agent standing by. Select a demo scenario or speak to begin diagnostics."
+              "FirstFix agent standing by. Select a demo scenario, speak, or upload a rating plate image to begin diagnostics."
             </div>
           </div>
 
-          <!-- Sandboxed MCP App Iframe -->
+          <!-- Sandboxed MCP App Iframe (ui://) -->
           <div class="iframe-container">
             <iframe id="mcp-app-iframe" src="/api/mcp-apps/diagnostic-intake.html" title="FirstFix MCP App Viewport"></iframe>
           </div>
@@ -113,6 +138,30 @@
             </div>
             <div class="device-hint">Interact directly with buttons inside the Echo Show screen above 👆</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Live Bedrock Vision & Image Uploader Row -->
+      <div class="vision-uploader-card">
+        <div class="uploader-header">
+          <span class="uploader-title">📷 Rating Plate OCR & Multimodal Vision Input</span>
+          <span class="badge-bedrock">Amazon Bedrock Nova Pro</span>
+        </div>
+        <div class="uploader-row">
+          <input type="file" id="input-plate-file" accept="image/*" style="display:none;">
+          <button class="btn-upload" id="btn-trigger-upload">
+            📁 Select Plate Image
+          </button>
+          <span class="upload-filename" id="upload-filename-display">No custom image selected (Using preset OCR)</span>
+          <label class="toggle-bedrock-label" title="Invoke live Bedrock Nova Pro via ConverseCommand in us-east-1">
+            <input type="checkbox" id="chk-force-live-bedrock">
+            <span>🔥 Force Live Bedrock Nova Pro OCR</span>
+          </label>
+        </div>
+        <div class="bedrock-telemetry-badge" id="bedrock-live-telemetry" style="display:none;">
+          <span>⚡ Live Bedrock Telemetry:</span>
+          <span id="bedrock-tokens-text">0 tokens (184 in / 42 out)</span> •
+          <span id="bedrock-latency-text">0ms</span>
         </div>
       </div>
 
@@ -135,28 +184,31 @@
 
     <!-- RIGHT PANEL: Contractor Fleet Console, Ring Smart Arrival & Protocol Inspector -->
     <section class="panel-right">
-      <!-- Tabs -->
+      <!-- 4 Rich Interactive Tabs -->
       <div class="tabs-header">
         <button class="tab-btn active" data-tab="tab-fleet">
-          🚚 Contractor Fleet & Van Inventory
+          🚚 Fleet & FSM Webhooks
         </button>
         <button class="tab-btn" data-tab="tab-ring">
-          🔔 Ring Smart Arrival Access
+          🔔 Ring Smart Arrival Camera
         </button>
         <button class="tab-btn" data-tab="tab-protocol">
-          🔍 MCP & Agent Reasoning Trace
+          🔐 MCP, UCP & OAuth 2.1 PKCE
+        </button>
+        <button class="tab-btn" data-tab="tab-aws">
+          ☁️ AWS Cloud & DynamoDB
         </button>
       </div>
 
-      <!-- TAB 1: Contractor Fleet Console -->
+      <!-- TAB 1: Contractor Fleet Console & FSM Webhook Feed -->
       <div class="tab-content active" id="tab-fleet">
         <div class="tab-intro">
-          <strong>Real-Time Van Stock & ROI Engine:</strong>
-          Shows live stock counts on all 4 contractor vans in ZIP 98101. When an appointment is reserved via Alexa+ UCP, stock is held and decremented in real time.
+          <strong>Real-Time Van Inventory & B2B FSM Dispatch Engine:</strong>
+          Shows live stock counts for 100% of SKUs on all 4 contractor vans in ZIP 98101. When an appointment is reserved via Alexa+ UCP, stock is held in real time and a B2B FSM dispatch webhook is triggered.
         </div>
 
         <div class="fleet-cards" id="fleet-van-list">
-          <!-- Populated dynamically via /api/fleet/status -->
+          <!-- Populated dynamically via /api/fleet/status with 100% of SKUs -->
         </div>
 
         <div class="roi-summary-card">
@@ -183,27 +235,79 @@
             </div>
           </div>
         </div>
+
+        <!-- B2B FSM Webhook Dispatch Feed (Gap G-8) -->
+        <div class="fsm-webhook-card">
+          <div class="fsm-header">
+            <div>
+              <span class="fsm-title">📡 B2B Contractor FSM Dispatch Feed</span>
+              <span class="fsm-sub">Compatible with ServiceTitan v2, Housecall Pro & Jobber Webhook APIs</span>
+            </div>
+            <button class="btn-test-fsm" id="btn-trigger-fsm-test">
+              ⚡ Test FSM Webhook Dispatch
+            </button>
+          </div>
+          <div class="table-container">
+            <table class="fsm-table">
+              <thead>
+                <tr>
+                  <th>Event ID</th>
+                  <th>Target FSM</th>
+                  <th>Contractor & Van</th>
+                  <th>Technician</th>
+                  <th>Pre-Diagnosed SKU</th>
+                  <th>UCP Deposit</th>
+                  <th>Delivery Status</th>
+                </tr>
+              </thead>
+              <tbody id="fsm-webhook-tbody">
+                <tr><td colspan="7" style="text-align:center; color:#64748b;">No FSM webhooks dispatched yet. Reserve an appointment or click Test FSM Webhook Dispatch above.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- TAB 2: Ring Smart Arrival Access Simulator -->
       <div class="tab-content" id="tab-ring">
         <div class="tab-intro">
-          <strong>Ring Temporary Access Controller:</strong>
-          Time-bounded single-entry arrival window provisioned during Alexa+ UCP checkout. Confirms technician identity via front door camera.
+          <strong>Ring Temporary Access Controller & Smart Video Doorbell Simulator:</strong>
+          Time-bounded single-entry arrival window provisioned during Alexa+ UCP checkout. Confirms technician identity at front door camera before granting garage/side-door entry.
+        </div>
+
+        <!-- Simulated Ring Doorbell Video Feed Card -->
+        <div class="ring-camera-feed-card">
+          <div class="camera-feed-header">
+            <div class="feed-live-indicator"><span class="rec-dot"></span> LIVE • Ring Battery Doorbell Pro HD</div>
+            <div class="feed-device-tag">Front Porch Cam #01 • 1080p HDR</div>
+          </div>
+          <div class="camera-viewport" id="ring-camera-viewport">
+            <div class="camera-tech-overlay">
+              <div class="tech-card-sim">
+                <div class="tech-sim-avatar">👨‍🔧</div>
+                <div class="tech-sim-info">
+                  <div class="tech-sim-name">Marcus Vance</div>
+                  <div class="tech-sim-co">Apex Home Services • Van #4</div>
+                  <div class="tech-sim-badge">✓ Verified Badge #APX-4089</div>
+                </div>
+              </div>
+              <div class="camera-scanner-line"></div>
+            </div>
+          </div>
         </div>
 
         <div class="ring-status-card" id="ring-window-status">
           <div class="ring-header">
             <div class="ring-title">
               <span class="ring-icon">📹</span>
-              <span>Front Door Cam (device_front_door_01)</span>
+              <span>Arrival Window Provisioning Status</span>
             </div>
             <span class="badge-armed" id="ring-badge-status">ARMED • PENDING ARRIVAL</span>
           </div>
           <div class="ring-details" id="ring-window-details">
-            <div><strong>Technician:</strong> Marcus Vance (Apex Home Services Van #4)</div>
-            <div><strong>Arrival Window:</strong> 14:00 – 15:30 UTC</div>
-            <div><strong>Security Policy:</strong> MONITORED_SINGLE_ENTRY (Temporary PIN / Camera ID)</div>
+            <div><strong>Assigned Technician:</strong> Marcus Vance (Apex Home Services Van #4)</div>
+            <div><strong>Arrival Window:</strong> 14:00 – 15:30 UTC (Single Entry)</div>
+            <div><strong>Security Policy:</strong> MONITORED_SINGLE_ENTRY (2-Hour Temporary Cryptographic Token)</div>
           </div>
 
           <div class="ring-actions">
@@ -230,24 +334,25 @@
                 </tr>
               </thead>
               <tbody id="ring-audit-tbody">
-                <tr><td colspan="5" style="text-align:center; color:#6b7280;">No arrival events recorded yet. Click simulation buttons above.</td></tr>
+                <tr><td colspan="5" style="text-align:center; color:#64748b;">No arrival events recorded yet. Click simulation buttons above.</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- TAB 3: MCP & Agent Protocol Trace -->
+      <!-- TAB 3: MCP, UCP & OAuth 2.1 PKCE Protocol Lab -->
       <div class="tab-content" id="tab-protocol">
         <div class="tab-intro">
-          <strong>Autonomous Agent Reasoning Trace:</strong>
-          Step-by-step trace showing deterministic tool execution, sub-35ms latencies, and protocol compliance.
+          <strong>Protocol Lab & Autonomous Agent Reasoning Trace:</strong>
+          Inspect real-time deterministic tool execution, sub-35ms latencies, 24-hour UCP idempotency caching, and RFC 7636 OAuth 2.1 PKCE (S256) handshake defense.
         </div>
 
         <div class="reasoning-trace-list" id="reasoning-trace-container">
           <div class="trace-empty">Run an orchestration scenario to inspect step-by-step agent trace.</div>
         </div>
 
+        <!-- UCP Idempotency Lab Card -->
         <div class="protocol-inspector-card">
           <div class="inspector-header">
             <span>UCP Idempotency & Conflict Engine</span>
@@ -258,13 +363,91 @@
           <div class="inspector-result" id="idemp-result">Click button above to verify UCP Idempotency-Key caching.</div>
         </div>
 
+        <!-- OAuth 2.1 PKCE (S256) Security Lab Card (Gap G-4) -->
+        <div class="protocol-inspector-card">
+          <div class="inspector-header">
+            <span>OAuth 2.1 PKCE (S256) & RFC 9728 Security Defense</span>
+            <button class="btn-test-oauth" id="btn-test-oauth21">
+              🔐 Test PKCE S256 Handshake & 401 Defense
+            </button>
+          </div>
+          <div class="inspector-result" id="oauth-result">
+            OAuth 2.1 PKCE authorization server ready. Click button above to execute live code_challenge verification and test invalid Bearer token 401 defense.
+          </div>
+        </div>
+
         <div class="discovery-links-card">
-          <div class="discovery-title">Protocol Discovery Profiles:</div>
+          <div class="discovery-title">Live Protocol Discovery Profiles:</div>
           <div class="links-row">
-            <a href="/.well-known/oauth-authorization-server" target="_blank" class="link-pill">OAuth 2.1 AS</a>
+            <a href="/.well-known/oauth-authorization-server" target="_blank" class="link-pill">OAuth 2.1 AS Metadata</a>
             <a href="/.well-known/oauth-protected-resource" target="_blank" class="link-pill">RFC 9728 Protected Resource</a>
             <a href="/.well-known/ucp" target="_blank" class="link-pill">UCP Profile</a>
+            <a href="/v1/fsm/dispatches" target="_blank" class="link-pill">FSM Webhooks</a>
+            <a href="/api/aws/dynamo-records" target="_blank" class="link-pill">DynamoDB Records</a>
             <a href="/health" target="_blank" class="link-pill">Health & Telemetry</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: Live AWS us-east-1 & DynamoDB Telemetry -->
+      <div class="tab-content" id="tab-aws">
+        <div class="tab-intro">
+          <strong>Live AWS us-east-1 Serverless Cloud Infrastructure:</strong>
+          Inspect live cloud resources deployed for FirstFix MCP, query Amazon DynamoDB (FirstFixMcpState) records in real time, and monitor Amazon Bedrock Nova Pro telemetry.
+        </div>
+
+        <div class="aws-arch-card">
+          <div class="aws-arch-header">
+            <span>☁️ AWS Serverless Architecture Topology</span>
+            <span class="badge-live-aws">Active in us-east-1</span>
+          </div>
+          <div class="aws-arch-grid">
+            <div class="aws-component-box">
+              <div class="comp-icon">λ</div>
+              <div class="comp-title">AWS Lambda Function URL</div>
+              <div class="comp-detail" id="aws-lambda-url">https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/</div>
+              <div class="comp-status green">✓ Active (Node.js 22, arm64)</div>
+            </div>
+            <div class="aws-component-box">
+              <div class="comp-icon">⚡</div>
+              <div class="comp-title">Amazon Bedrock Nova Pro</div>
+              <div class="comp-detail">us.amazon.nova-pro-v1:0 (Vision & Reasoning)</div>
+              <div class="comp-status green">✓ Verified in us-east-1</div>
+            </div>
+            <div class="aws-component-box">
+              <div class="comp-icon">🗄️</div>
+              <div class="comp-title">Amazon DynamoDB</div>
+              <div class="comp-detail">FirstFixMcpState (PAY_PER_REQUEST)</div>
+              <div class="comp-status green" id="aws-dynamo-status">✓ Connected us-east-1</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live DynamoDB Query Inspector (Gap G-5) -->
+        <div class="dynamo-inspector-card">
+          <div class="dynamo-header">
+            <div>
+              <span class="dynamo-title">🗄️ Amazon DynamoDB Live Records Inspector</span>
+              <span class="dynamo-sub">Table: FirstFixMcpState • Region: us-east-1 • Read-Back API</span>
+            </div>
+            <button class="btn-query-dynamo" id="btn-query-dynamo-records">
+              🔄 Query Live DynamoDB Records
+            </button>
+          </div>
+          <div class="table-container">
+            <table class="dynamo-table">
+              <thead>
+                <tr>
+                  <th>Partition Key (PK)</th>
+                  <th>Sort Key (SK)</th>
+                  <th>Payload Summary</th>
+                  <th>Last Updated</th>
+                </tr>
+              </thead>
+              <tbody id="dynamo-records-tbody">
+                <tr><td colspan="4" style="text-align:center; color:#64748b;">Click Query Live DynamoDB Records above to inspect records stored inside Amazon DynamoDB.</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

@@ -128,6 +128,7 @@ export interface RecommendedContractorSlot {
   technicianName: string;
   rating: number;
   slotId: string;
+  slotDate?: string;
   startTime: string;
   endTime: string;
   hasExactPart: boolean;
@@ -152,5 +153,7 @@ export interface ContractorVanMatchResult {
     daysSaved: number;
     baselineFtfr: number;
     firstFixFtfr: number;
+    estimatedSecondTruckRollSavingsUsd?: number;
+    firstTimeFixRateImprovement?: number;
   };
 }
