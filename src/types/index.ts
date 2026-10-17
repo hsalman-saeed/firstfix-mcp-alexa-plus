@@ -105,6 +105,16 @@ export interface WarrantyStatus {
   details: string;
 }
 
+export interface CounterfactualComparison {
+  alternativePartSku: string;
+  alternativeOemPartSku?: string;
+  alternativePartName: string;
+  alternativeSerialRule: string;
+  alternativePartCostUsd: number;
+  whyDisambiguationMatters: string;
+  differenceSummary?: string;
+}
+
 export interface SerialVariantBOMResult {
   status: 'MATCHED' | 'PART_VERIFICATION_REQUIRED';
   brand?: string;
@@ -119,6 +129,7 @@ export interface SerialVariantBOMResult {
   safe90sDiyPrecheck?: string;
   warrantyStatus?: WarrantyStatus;
   verificationGuidance?: string;
+  counterfactualComparison?: CounterfactualComparison;
 }
 
 export interface RecommendedContractorSlot {

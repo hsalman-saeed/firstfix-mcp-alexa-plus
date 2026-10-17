@@ -132,15 +132,62 @@ function startClock() {
   setInterval(updateTime, 1000);
 }
 
-// Initialize on Load
+// Workflow Stepper Indicator
+function updateWorkflowStep(stepNumber) {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById(`step-indicator-${i}`);
+    if (el) {
+      if (i < stepNumber) {
+        el.className = 'stepper-step completed';
+      } else if (i === stepNumber) {
+        el.className = 'stepper-step active';
+      } else {
+        el.className = 'stepper-step';
+      }
+    }
+  }
+}
+
+// Selects Scenario and Executes Orchestration (1-Click Run)
+async function selectAndRunScenario(scId, notify = true) {
+  const buttons = document.querySelectorAll('.btn-scenario');
+  buttons.forEach((b) => {
+    if (parseInt(b.getAttribute('data-scenario'), 10) === scId) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+
+  state.activeScenario = scId;
+  const config = SCENARIOS[scId];
+  if (!config) return;
+
+  if (inputUtterance) inputUtterance.value = config.utterance;
+  if (config.plateId && selectPlate) selectPlate.value = config.plateId;
+  state.customImageBase64 = null;
+  if (uploadFilenameDisplay) uploadFilenameDisplay.textContent = 'Preset OCR Active';
+
+  if (notify) {
+    playChime(660);
+    showToast(`Loaded Scenario ${scId}`, config.name, 'info');
+  }
+
+  updateWorkflowStep(1);
+  await runOrchestration();
+}
+
+// Initialize on Load (Synchronize Scenario 1 Live on Boot)
 window.addEventListener('DOMContentLoaded', async () => {
   startClock();
   setupTabs();
   setupScenarioButtons();
   setupEventListeners();
   setupPostMessageBridge();
-  await refreshFleetStatus();
   await performInitialOAuthTokenFetch();
+  // Automatically execute Scenario 1 (Bosch FD99 Happy Path) immediately on boot
+  // so all controls, input, iframe, and fleet matrix are 100% in sync within <100ms
+  await selectAndRunScenario(1, false);
   showToast('FirstFix MCP Ready', 'Dual-Screen Echo Show 15 Simulator & AWS us-east-1 telemetry active.', 'success');
 });
 
@@ -164,32 +211,13 @@ function setupTabs() {
   });
 }
 
-// Setup Scenario Preset Buttons
+// Setup Scenario Preset Buttons (1-Click Run on Click)
 function setupScenarioButtons() {
   const buttons = document.querySelectorAll('.btn-scenario');
   buttons.forEach((btn) => {
     btn.addEventListener('click', async () => {
-      buttons.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
       const scId = parseInt(btn.getAttribute('data-scenario'), 10);
-      state.activeScenario = scId;
-      const config = SCENARIOS[scId];
-
-      if (config) {
-        inputUtterance.value = config.utterance;
-        if (config.plateId && selectPlate) {
-          selectPlate.value = config.plateId;
-        }
-
-        state.customImageBase64 = null;
-        if (uploadFilenameDisplay) {
-          uploadFilenameDisplay.textContent = 'No custom image selected (Using preset OCR)';
-        }
-
-        playChime(660);
-        showToast(`Loaded Scenario ${scId}`, config.name, 'info');
-        await runOrchestration();
-      }
+      await selectAndRunScenario(scId, true);
     });
   });
 }
@@ -284,6 +312,12 @@ function setupPostMessageBridge() {
           console.warn('[Host Bridge] Non-JSON message from app:', content);
         }
       }
+    } else if (data.method === 'ui/resize') {
+      const height = data.params?.height;
+      if (height && iframe) {
+        const targetHeight = Math.max(420, Math.min(height, 680));
+        iframe.style.height = `${targetHeight}px`;
+      }
     } else if (data.method === 'tools/call') {
       console.log('[Host Bridge] Tool Call requested from MCP App:', data.params);
       if (data.params.name === 'get_stocked_van_availability') {
@@ -346,6 +380,7 @@ async function executeUcpCheckout(checkoutParams) {
 
     // Decrement stock & arm Ring access window
     state.currentAppointmentId = session.appointmentId;
+    updateWorkflowStep(3);
     playChime(1046);
     showToast(
       'UCP Order Captured',
@@ -507,6 +542,19 @@ async function runOrchestration(overrides = {}) {
     voiceTranscript.textContent = `"${data.voiceResponseText}"`;
     speakText(data.voiceResponseText);
 
+    // Extract Diagnosed Part SKU
+    const activeSku = data.bomResolution?.oemPartSku || data.bomResult?.oemPartSku || null;
+    if (activeSku) {
+      state.currentNeededPartSku = activeSku;
+    }
+
+    // Update Stepper
+    if (data.status === 'requires_human_confirmation') {
+      updateWorkflowStep(2);
+    } else if (activeSku || (data.recommendedSlots && data.recommendedSlots.length > 0)) {
+      updateWorkflowStep(2);
+    }
+
     // Render Reasoning Trace
     renderReasoningTrace(data.agentReasoningTrace || data.reasoningTrace || []);
 
@@ -526,8 +574,8 @@ async function runOrchestration(overrides = {}) {
       showToast('Orchestration Complete', `Diagnosed OEM part locked on stocked contractor van.`, 'success');
     }
 
-    // Refresh Fleet Console
-    await refreshFleetStatus();
+    // Refresh Fleet Console with the live active part SKU
+    await refreshFleetStatus(activeSku);
   } catch (err) {
     animateWaveform(false);
     if (cameraLed) cameraLed.classList.remove('active');
@@ -537,7 +585,7 @@ async function runOrchestration(overrides = {}) {
   }
 }
 
-// Loads specified ui:// resource into the Echo Show 15 Iframe
+// Loads specified ui:// resource into the Echo Show 15 Iframe (100% Dynamic Multi-Brand Data)
 function loadMcpAppInIframe(uri, contextData = {}) {
   state.activeIframeUri = uri;
   activeAppBadge.textContent = uri;
@@ -555,10 +603,23 @@ function loadMcpAppInIframe(uri, contextData = {}) {
     q.set('ocrConfidence', String(contextData.extractedPlate.ocrConfidence || 0.95));
     q.set('requiresHumanConfirmation', String(contextData.extractedPlate.requiresHumanConfirmation || false));
   }
-  if (contextData.bomResolution || contextData.bomResult) {
-    const bom = contextData.bomResolution || contextData.bomResult;
-    q.set('oemPartSku', bom.oemPartSku || '');
-    q.set('partName', bom.partName || '');
+  const bom = contextData.bomResolution || contextData.bomResult;
+  if (bom) {
+    if (bom.oemPartSku) q.set('oemPartSku', bom.oemPartSku);
+    if (bom.partName) q.set('partName', bom.partName);
+    if (bom.brand && !q.has('brand')) q.set('brand', bom.brand);
+    if (bom.modelNumber && !q.has('modelNumber')) q.set('modelNumber', bom.modelNumber);
+    if (bom.oemPartCostUsd) q.set('oemPartCostUsd', String(bom.oemPartCostUsd));
+    if (bom.serialVariantRuleApplied) q.set('serialVariantRuleApplied', bom.serialVariantRuleApplied);
+    if (bom.whySerialVariantMatters) q.set('whySerialVariantMatters', bom.whySerialVariantMatters);
+    if (bom.safe90sDiyPrecheck) q.set('safe90sDiyPrecheck', bom.safe90sDiyPrecheck);
+    if (bom.warrantyType) q.set('warrantyType', bom.warrantyType);
+    if (bom.counterfactualComparison) {
+      q.set('counterfactualComparison', JSON.stringify(bom.counterfactualComparison));
+    }
+  }
+  if (contextData.recommendedSlots && contextData.recommendedSlots.length > 0) {
+    q.set('recommendedSlots', JSON.stringify(contextData.recommendedSlots));
   }
   if (contextData.correlationToken) {
     q.set('correlationToken', contextData.correlationToken);
@@ -589,11 +650,15 @@ function renderReasoningTrace(trace) {
     .join('');
 }
 
-// Refreshes Fleet Console, Real-Time Van Inventory (100% SKUs, No Truncation) & FSM Feed
-async function refreshFleetStatus() {
+// Refreshes Fleet Console, Real-Time Van Inventory (100% SKUs, No Truncation) & Highlights Needed Part
+async function refreshFleetStatus(activeOemPartSku = null) {
   try {
     const res = await fetch('/api/fleet/status');
     const data = await res.json();
+
+    // Determine target SKU to match against
+    const targetSku = activeOemPartSku || state.currentNeededPartSku || 'BOSCH-00631200';
+    state.currentNeededPartSku = targetSku;
 
     // Update Top KPIs
     document.getElementById('kpi-rolls').textContent = data.telemetry.preventedTruckRollsCount;
@@ -606,22 +671,30 @@ async function refreshFleetStatus() {
     if (data.vans && data.vans.length > 0) {
       fleetVanList.innerHTML = data.vans
         .map((van) => {
-          const isMetro = van.vanId === 'van_metro_02';
-          const statusClass = isMetro ? 'unstocked' : 'stocked';
-          const badgeText = isMetro ? 'FILTERED (0 STOCK)' : 'STOCKED & READY';
-          const badgeClass = isMetro ? 'red' : 'green';
+          const matchingPart = van.inventory.find((i) => i.oemPartSku === targetSku);
+          const hasTargetPart = Boolean(matchingPart && matchingPart.quantity > 0);
+
+          const statusClass = hasTargetPart ? 'stocked' : 'unstocked';
+          const badgeText = hasTargetPart
+            ? '✓ STOCKED FOR THIS JOB'
+            : `✗ FILTERED OUT (0 OF ${targetSku})`;
+          const badgeClass = hasTargetPart ? 'green' : 'red';
 
           const invRows = van.inventory
             .map((i) => {
+              const isTarget = i.oemPartSku === targetSku;
+              const rowHighlight = isTarget ? 'highlight-needed-part' : '';
+              const neededBadge = isTarget ? '<span class="needed-badge">★ NEEDED</span>' : '';
+
               const prev = state.previousVanStock[`${van.vanId}:${i.oemPartSku}`];
               const flashClass = prev !== undefined && prev > i.quantity ? 'flash-decrement' : '';
               state.previousVanStock[`${van.vanId}:${i.oemPartSku}`] = i.quantity;
 
               return `
-              <tr class="${flashClass}">
-                <td class="sku-code">${i.oemPartSku}</td>
-                <td class="sku-desc" style="color:#94a3b8; font-size:11px;">${i.partDescription || ''}</td>
-                <td class="sku-qty ${i.quantity > 0 ? 'stocked' : 'out'}">${i.quantity} on van</td>
+              <tr class="${rowHighlight} ${flashClass}">
+                <td class="sku-code">${i.oemPartSku}${neededBadge}</td>
+                <td class="sku-desc" title="${i.partDescription || ''}">${i.partDescription || ''}</td>
+                <td class="sku-qty-cell"><span class="sku-qty-pill ${i.quantity > 0 ? 'stocked' : 'out'}">${i.quantity} on van</span></td>
               </tr>
             `;
             })
@@ -641,7 +714,7 @@ async function refreshFleetStatus() {
                 <tr>
                   <th>OEM SKU</th>
                   <th>Part Description</th>
-                  <th>Stock</th>
+                  <th style="text-align:right;">Stock</th>
                 </tr>
               </thead>
               <tbody>${invRows}</tbody>

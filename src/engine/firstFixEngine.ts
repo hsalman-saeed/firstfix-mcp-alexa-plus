@@ -209,6 +209,23 @@ export function resolveSerialVariantBOM(input: BOMResolutionInput): SerialVarian
     input.installDateIso
   );
 
+  // Sibling serial range for dynamic counterfactual comparison proof
+  const siblingRange = catalogEntry.serialRanges.find(
+    (range) => range.oemPartSku !== matchedRange.oemPartSku
+  );
+
+  const counterfactualComparison = siblingRange
+    ? {
+        alternativePartSku: siblingRange.oemPartSku,
+        alternativeOemPartSku: siblingRange.oemPartSku,
+        alternativePartName: siblingRange.partName,
+        alternativeSerialRule: siblingRange.serialPatternDescription,
+        alternativePartCostUsd: siblingRange.oemPartCostUsd,
+        whyDisambiguationMatters: siblingRange.whySerialVariantMatters,
+        differenceSummary: `${siblingRange.serialPatternDescription}: uses ${siblingRange.oemPartSku} (${siblingRange.partName}) — ${siblingRange.whySerialVariantMatters}`,
+      }
+    : undefined;
+
   return {
     status: 'MATCHED',
     brand: catalogEntry.brand,
@@ -222,6 +239,7 @@ export function resolveSerialVariantBOM(input: BOMResolutionInput): SerialVarian
     serialVariantRuleApplied: matchedRange.serialPatternDescription,
     safe90sDiyPrecheck: matchedRange.safe90sDiyPrecheck || catalogEntry.defaultSafePrecheck,
     warrantyStatus: warranty,
+    counterfactualComparison,
   };
 }
 

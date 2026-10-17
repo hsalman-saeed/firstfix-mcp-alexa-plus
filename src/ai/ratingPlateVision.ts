@@ -193,23 +193,6 @@ export function normalizeBedrockParsedJson(parsed: any, overrideErrorCode?: stri
  * Extracts rating plate information using Amazon Bedrock Nova Pro (or deterministic verified fallback)
  */
 export async function extractRatingPlate(input: ExtractInput): Promise<ExtractedRatingPlate> {
-  // Mode 1: Sample Preset (Deterministic 1-click test mode)
-  if (input.samplePlateId && SAMPLE_RATING_PLATES[input.samplePlateId]) {
-    const preset = SAMPLE_RATING_PLATES[input.samplePlateId];
-    return validateExtractedPlate(
-      {
-        brand: preset.brand,
-        modelNumber: preset.modelNumber,
-        serialNumber: preset.serialNumber,
-        errorCode: input.errorCode || preset.errorCode,
-        ocrConfidence: preset.ocrConfidence,
-        installDateIso: preset.installDateIso,
-      },
-      input.userConfirmedSerial,
-      'deterministic_preset_or_ocr'
-    );
-  }
-
   // Mode 2: Live Amazon Bedrock Nova Pro Vision Model
   const hasAwsCreds = Boolean(
     process.env.AWS_ACCESS_KEY_ID ||
@@ -261,11 +244,16 @@ export async function extractRatingPlate(input: ExtractInput): Promise<Extracted
           },
         ];
       } else {
+        const preset = input.samplePlateId ? SAMPLE_RATING_PLATES[input.samplePlateId] : undefined;
+        const textPayload = preset
+          ? `Preset Name: ${preset.name}\nVisual: ${preset.imageVisualDescription || preset.description}\nSymptom: ${preset.symptomDescription || ''}\nUser query: ${input.rawText || ''}`
+          : input.rawText || 'Appliance rating plate';
+
         messages = [
           {
             role: 'user',
             content: [
-              { text: `${prompt}\n\nRating Plate Text or Utterance:\n${input.rawText || ''}` },
+              { text: `${prompt}\n\nRating Plate Text or Utterance:\n${textPayload}` },
             ],
           },
         ];
@@ -303,6 +291,23 @@ export async function extractRatingPlate(input: ExtractInput): Promise<Extracted
     } catch (err) {
       console.warn('[Bedrock Nova Pro Vision Fallback Triggered]', err);
     }
+  }
+
+  // Mode 1: Sample Preset (Fast deterministic preset when live Bedrock is not forced)
+  if (input.samplePlateId && SAMPLE_RATING_PLATES[input.samplePlateId]) {
+    const preset = SAMPLE_RATING_PLATES[input.samplePlateId];
+    return validateExtractedPlate(
+      {
+        brand: preset.brand,
+        modelNumber: preset.modelNumber,
+        serialNumber: preset.serialNumber,
+        errorCode: input.errorCode || preset.errorCode,
+        ocrConfidence: preset.ocrConfidence,
+        installDateIso: preset.installDateIso,
+      },
+      input.userConfirmedSerial,
+      'deterministic_preset_or_ocr'
+    );
   }
 
   // Mode 3: Real-Time 15-Brand Catalog & NLP Entity Extractor (Finding F-6: Zero Silent Bosch Fallback)

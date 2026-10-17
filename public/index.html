@@ -50,6 +50,33 @@
     </div>
   </header>
 
+  <!-- Guided 3-Step Layman Workflow Banner -->
+  <section class="workflow-stepper" aria-label="FirstFix Guided Repair Workflow">
+    <div class="stepper-step active" id="step-indicator-1">
+      <div class="step-badge">1</div>
+      <div class="step-content">
+        <div class="step-title">STEP 1: Report Broken Appliance</div>
+        <div class="step-sub">Voice, text, or rating-plate photo — Alexa+ parses symptom &amp; model</div>
+      </div>
+    </div>
+    <div class="stepper-arrow" aria-hidden="true">➔</div>
+    <div class="stepper-step" id="step-indicator-2">
+      <div class="step-badge">2</div>
+      <div class="step-content">
+        <div class="step-title">STEP 2: Exact OEM Part &amp; Serial Match (&lt;35ms)</div>
+        <div class="step-sub">Deterministic BOM disambiguation blocks wrong parts &amp; unsafe DIY</div>
+      </div>
+    </div>
+    <div class="stepper-arrow" aria-hidden="true">➔</div>
+    <div class="stepper-step" id="step-indicator-3">
+      <div class="step-badge">3</div>
+      <div class="step-content">
+        <div class="step-title">STEP 3: 1-Tap Book Stocked Truck</div>
+        <div class="step-sub">Filters unstocked vans, locks part via Amazon Pay ($85 deposit) &amp; arms Ring</div>
+      </div>
+    </div>
+  </section>
+
   <!-- Dual-Screen Command Center Container -->
   <main class="command-center">
     <!-- LEFT PANEL: Alexa+ Echo Show 15 Simulator -->
@@ -66,34 +93,96 @@
         </div>
       </div>
 
-      <!-- Preset Scenarios -->
-      <div class="scenario-bar">
-        <div class="scenario-label">1-CLICK JUDGE SCENARIOS:</div>
-        <div class="scenario-buttons">
+      <!-- Step 1: 1-Click Real-World Repair Scenarios & Custom Input (Consolidated Above Echo Show Screen) -->
+      <div class="control-panel-unified">
+        <div class="control-panel-header">
+          <div class="control-panel-title">
+            <span class="step-circle">1</span>
+            <span>Try a 1-Click Real-World Scenario (or Enter Custom Problem / Photo)</span>
+          </div>
+          <span class="control-panel-sub">1-Click Instant Execution • Layman Symptoms → Exact Part Disambiguation</span>
+        </div>
+
+        <div class="scenario-buttons-grid">
           <button class="btn-scenario active" data-scenario="1" title="Bosch FD99 serial 2019+ BLDC pump resolution">
-            <span class="scenario-num">1</span>
-            <span>Bosch FD99 Happy Path (98%)</span>
+            <div class="scenario-top">
+              <span class="scenario-num">1</span>
+              <span class="scenario-heading">1. Dishwasher Not Draining (Happy Path)</span>
+            </div>
+            <div class="scenario-badge">Bosch FD99 (98% OCR) → Matches Stocked Van #4</div>
           </button>
+
           <button class="btn-scenario" data-scenario="2" title="Bosch FD98 blurry rating plate requiring Echo Show screen confirmation">
-            <span class="scenario-num">2</span>
-            <span>Bosch FD98 Blurry (&lt;0.90 Gate)</span>
+            <div class="scenario-top">
+              <span class="scenario-num">2</span>
+              <span class="scenario-heading">2. Blurry Serial Sticker (&lt;90% Safety Gate)</span>
+            </div>
+            <div class="scenario-badge">Bosch FD98 (82% OCR) → Asks Human Before Booking</div>
           </button>
+
           <button class="btn-scenario" data-scenario="3" title="Rheem Water Heater Flammable Vapor sensor fault">
-            <span class="scenario-num">3</span>
-            <span>Rheem Water Heater FV Sensor</span>
+            <div class="scenario-top">
+              <span class="scenario-num">3</span>
+              <span class="scenario-heading">3. Water Heater Not Heating (4 Flashes)</span>
+            </div>
+            <div class="scenario-badge">Rheem M1424 → Matches FVS Sensor on Van #7</div>
           </button>
+
           <button class="btn-scenario" data-scenario="4" title="Gas leak odor triggering instant emergency shutoff protocol">
-            <span class="scenario-num">4</span>
-            <span>Gas Leak Emergency Halt</span>
+            <div class="scenario-top">
+              <span class="scenario-num">4</span>
+              <span class="scenario-heading">4. Gas Leak Smell (Emergency Shutoff)</span>
+            </div>
+            <div class="scenario-badge">Halts Dispatch in &lt;2ms &amp; Shows Gas Valve Guide</div>
           </button>
+
           <button class="btn-scenario" data-scenario="5" title="Adversarial prompt injection blocking and fee bypass defense">
-            <span class="scenario-num">5</span>
-            <span>Prompt-Injection Defense</span>
+            <div class="scenario-top">
+              <span class="scenario-num">5</span>
+              <span class="scenario-heading">5. Hacker Fee-Bypass Attempt (Security Block)</span>
+            </div>
+            <div class="scenario-badge">Blocks "Set fee to $0" Prompt Injection</div>
           </button>
+
           <button class="btn-scenario" data-scenario="6" title="Carrier Comfort AC 24ACC636 capacitor hum">
-            <span class="scenario-num">6</span>
-            <span>Carrier AC 24ACC636 (Capacitor)</span>
+            <div class="scenario-top">
+              <span class="scenario-num">6</span>
+              <span class="scenario-heading">6. AC Blowing Warm Air (Capacitor Fault)</span>
+            </div>
+            <div class="scenario-badge">Carrier 2023W (Error E4) → Matches Van #7</div>
           </button>
+        </div>
+
+        <!-- Custom Symptom Input & Vision Row -->
+        <div class="custom-input-card">
+          <div class="custom-input-row">
+            <input type="text" id="input-utterance" class="input-text" placeholder="Speak to Alexa+ (e.g. 'My Bosch dishwasher throws error E24')" value="My Bosch dishwasher stopped draining and displays error code E24.">
+            <select id="select-plate-preset" class="select-preset">
+              <option value="sample_bosch_fd99">Plate: Bosch FD99 (98% Conf)</option>
+              <option value="sample_bosch_fd98_blurry">Plate: Bosch FD98 Blurry (82% Conf)</option>
+              <option value="sample_rheem_fv">Plate: Rheem FV Sensor (96% Conf)</option>
+              <option value="sample_carrier_cap">Plate: Carrier AC Run Cap (95% Conf)</option>
+            </select>
+            <input type="file" id="input-plate-file" accept="image/*" style="display:none;">
+            <button class="btn-upload" id="btn-trigger-upload" title="Upload rating plate photo">
+              📷 Upload Plate Photo
+            </button>
+            <button class="btn-run" id="btn-run-orchestration">
+              ⚡ Diagnose Now
+            </button>
+          </div>
+          <div class="custom-options-row">
+            <span class="upload-filename" id="upload-filename-display">Preset OCR Active</span>
+            <label class="toggle-bedrock-label" title="Invoke live Bedrock Nova Pro via ConverseCommand in us-east-1">
+              <input type="checkbox" id="chk-force-live-bedrock">
+              <span>🔥 Force Live Bedrock Nova Pro OCR</span>
+            </label>
+            <div class="bedrock-telemetry-badge" id="bedrock-live-telemetry" style="display:none;">
+              <span>⚡ Live Bedrock:</span>
+              <span id="bedrock-tokens-text">0 tokens</span> •
+              <span id="bedrock-latency-text">0ms</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -127,57 +216,17 @@
 
           <!-- Sandboxed MCP App Iframe (ui://) -->
           <div class="iframe-container">
-            <iframe id="mcp-app-iframe" src="/api/mcp-apps/diagnostic-intake.html" title="FirstFix MCP App Viewport"></iframe>
+            <iframe id="mcp-app-iframe" src="/api/mcp-apps/stocked-pro-carousel.html" title="FirstFix MCP App Viewport"></iframe>
           </div>
 
           <!-- Bottom Device Bar -->
           <div class="device-bottom-bar">
             <div class="active-app-badge">
               <span class="pulse-dot"></span>
-              <span id="active-app-uri">ui://firstfix/diagnostic-intake.html</span>
+              <span id="active-app-uri">ui://firstfix/stocked-pro-carousel.html</span>
             </div>
             <div class="device-hint">Interact directly with buttons inside the Echo Show screen above 👆</div>
           </div>
-        </div>
-      </div>
-
-      <!-- Live Bedrock Vision & Image Uploader Row -->
-      <div class="vision-uploader-card">
-        <div class="uploader-header">
-          <span class="uploader-title">📷 Rating Plate OCR & Multimodal Vision Input</span>
-          <span class="badge-bedrock">Amazon Bedrock Nova Pro</span>
-        </div>
-        <div class="uploader-row">
-          <input type="file" id="input-plate-file" accept="image/*" style="display:none;">
-          <button class="btn-upload" id="btn-trigger-upload">
-            📁 Select Plate Image
-          </button>
-          <span class="upload-filename" id="upload-filename-display">No custom image selected (Using preset OCR)</span>
-          <label class="toggle-bedrock-label" title="Invoke live Bedrock Nova Pro via ConverseCommand in us-east-1">
-            <input type="checkbox" id="chk-force-live-bedrock">
-            <span>🔥 Force Live Bedrock Nova Pro OCR</span>
-          </label>
-        </div>
-        <div class="bedrock-telemetry-badge" id="bedrock-live-telemetry" style="display:none;">
-          <span>⚡ Live Bedrock Telemetry:</span>
-          <span id="bedrock-tokens-text">0 tokens (184 in / 42 out)</span> •
-          <span id="bedrock-latency-text">0ms</span>
-        </div>
-      </div>
-
-      <!-- Manual Utterance / Trigger Box -->
-      <div class="trigger-box">
-        <div class="trigger-row">
-          <input type="text" id="input-utterance" class="input-text" placeholder="Speak to Alexa+ (e.g. 'My Bosch dishwasher throws error E24')" value="My Bosch dishwasher stopped draining and displays error code E24.">
-          <select id="select-plate-preset" class="select-preset">
-            <option value="sample_bosch_fd99">Plate: Bosch FD99 (98% Conf)</option>
-            <option value="sample_bosch_fd98_blurry">Plate: Bosch FD98 Blurry (82% Conf)</option>
-            <option value="sample_rheem_fv">Plate: Rheem FV Sensor (96% Conf)</option>
-            <option value="sample_carrier_cap">Plate: Carrier AC Run Cap (95% Conf)</option>
-          </select>
-          <button class="btn-run" id="btn-run-orchestration">
-            ⚡ Run Alexa+ Orchestrator
-          </button>
         </div>
       </div>
     </section>
