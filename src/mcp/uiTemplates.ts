@@ -87,13 +87,18 @@ export function renderDiagnosticIntakeHtml(params: TemplateParams = {}): string 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #0b0f19; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    body {
+    html, body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
       padding: 14px 16px;
+      padding-bottom: 24px;
       line-height: 1.45;
+      height: auto;
+      min-height: 100%;
+      overflow-x: hidden;
       overflow-y: auto;
+      box-sizing: border-box;
     }
     .header {
       display: flex;
@@ -364,17 +369,28 @@ export function renderDiagnosticIntakeHtml(params: TemplateParams = {}): string 
   </div>
 
   <script>
-    function notifyHeight() {
-      const h = document.documentElement.scrollHeight || document.body.scrollHeight;
+    function sendResize() {
+      const h = Math.max(
+        document.body ? document.body.scrollHeight : 0,
+        document.documentElement ? document.documentElement.scrollHeight : 0,
+        document.body ? document.body.offsetHeight : 0,
+        360
+      );
       window.parent.postMessage({
         jsonrpc: '2.0',
         method: 'ui/resize',
-        params: { height: Math.max(h + 20, 420) }
+        params: { height: h }
       }, '*');
     }
 
     window.addEventListener('load', () => {
-      notifyHeight();
+      sendResize();
+      setTimeout(sendResize, 50);
+      setTimeout(sendResize, 250);
+      setTimeout(sendResize, 600);
+      if (window.ResizeObserver && document.body) {
+        new ResizeObserver(() => sendResize()).observe(document.body);
+      }
       window.parent.postMessage({
         jsonrpc: '2.0',
         method: 'ui/initialize',
@@ -386,8 +402,7 @@ export function renderDiagnosticIntakeHtml(params: TemplateParams = {}): string 
       }, '*');
     });
 
-    window.addEventListener('resize', notifyHeight);
-    setTimeout(notifyHeight, 150);
+    window.addEventListener('resize', sendResize);
 
     // Confirmation Button sends verified serial event to Host
     document.getElementById('btn-confirm-serial')?.addEventListener('click', () => {
@@ -667,13 +682,18 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #0b0f19; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-    body {
+    html, body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       padding: 12px 16px;
+      padding-bottom: 24px;
       line-height: 1.45;
+      height: auto;
+      min-height: 100%;
+      overflow-x: hidden;
       overflow-y: auto;
+      box-sizing: border-box;
     }
     .header {
       display: flex;
@@ -897,6 +917,41 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
         }
       }, 700);
     }
+
+    function sendResize() {
+      const h = Math.max(
+        document.body ? document.body.scrollHeight : 0,
+        document.documentElement ? document.documentElement.scrollHeight : 0,
+        document.body ? document.body.offsetHeight : 0,
+        360
+      );
+      window.parent.postMessage({
+        jsonrpc: '2.0',
+        method: 'ui/resize',
+        params: { height: h }
+      }, '*');
+    }
+
+    window.addEventListener('load', () => {
+      sendResize();
+      setTimeout(sendResize, 50);
+      setTimeout(sendResize, 250);
+      setTimeout(sendResize, 600);
+      if (window.ResizeObserver && document.body) {
+        new ResizeObserver(() => sendResize()).observe(document.body);
+      }
+      window.parent.postMessage({
+        jsonrpc: '2.0',
+        method: 'ui/initialize',
+        params: {
+          appUri: 'ui://firstfix/stocked-pro-carousel.html',
+          version: '1.0.0',
+          capabilities: ['tools/call', 'ui/message', 'ui/resize']
+        }
+      }, '*');
+    });
+
+    window.addEventListener('resize', sendResize);
   </script>
 </body>
 </html>`;
@@ -932,13 +987,20 @@ export function renderEmergencyShutoffHtml(params: TemplateParams = {}): string 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #1a0a0a; }
     ::-webkit-scrollbar-thumb { background: #551b1b; border-radius: 3px; }
+    html, body {
+      height: auto;
+      min-height: 100%;
+      box-sizing: border-box;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding-bottom: 24px;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding: 14px 16px;
+      padding: 14px 16px 24px 16px;
       line-height: 1.45;
-      overflow-y: auto;
     }
     .banner {
       background: var(--red);
@@ -1054,17 +1116,28 @@ export function renderEmergencyShutoffHtml(params: TemplateParams = {}): string 
   </div>
 
   <script>
-    function notifyHeight() {
-      const h = document.documentElement.scrollHeight || document.body.scrollHeight;
+    function sendResize() {
+      const h = Math.max(
+        document.body ? document.body.scrollHeight : 0,
+        document.documentElement ? document.documentElement.scrollHeight : 0,
+        document.body ? document.body.offsetHeight : 0,
+        360
+      );
       window.parent.postMessage({
         jsonrpc: '2.0',
         method: 'ui/resize',
-        params: { height: Math.max(h + 20, 380) }
+        params: { height: h }
       }, '*');
     }
 
     window.addEventListener('load', () => {
-      notifyHeight();
+      sendResize();
+      setTimeout(sendResize, 50);
+      setTimeout(sendResize, 250);
+      setTimeout(sendResize, 600);
+      if (window.ResizeObserver && document.body) {
+        new ResizeObserver(() => sendResize()).observe(document.body);
+      }
       window.parent.postMessage({
         jsonrpc: '2.0',
         method: 'ui/initialize',
@@ -1076,8 +1149,8 @@ export function renderEmergencyShutoffHtml(params: TemplateParams = {}): string 
       }, '*');
     });
 
-    window.addEventListener('resize', notifyHeight);
-    setTimeout(notifyHeight, 150);
+    window.addEventListener('resize', sendResize);
+    setTimeout(sendResize, 150);
 
     // Web Audio Warning Tone Generator
     let audioCtx = null;

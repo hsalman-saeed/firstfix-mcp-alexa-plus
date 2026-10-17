@@ -30,15 +30,16 @@ This skill provides AI coding assistants (Claude Code, Cursor, Google Antigravit
 
 ---
 
-## Reference Implementation
-- Live Repository: [https://github.com/firstfix-mcp/firstfix-mcp-alexa-plus](https://github.com/firstfix-mcp/firstfix-mcp-alexa-plus)
-- Standalone SDK: `alexa-plus-ucp-mcp-kit`
-- Live Demo: AWS Lambda Function URL (`https://*.lambda-url.us-east-1.on.aws`)
+## Reference Implementation & Live Links
+- **Official Open Pull Request:** [AmazonAppDev/devices-agent-skills PR #14](https://github.com/AmazonAppDev/devices-agent-skills/pull/14)
+- **Public GitHub Repository:** [https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus](https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus)
+- **Standalone SDK Package:** `alexa-plus-ucp-mcp-kit` (`packages/alexa-plus-ucp-mcp-kit`)
+- **Live AWS us-east-1 Deployment:** [https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/)
 
 ---
 
 ## Validation Checklist
 - [x] Conforms to `agentskills.io` YAML frontmatter specifications.
 - [x] Includes friction log resolutions and production code snippets.
-- [x] Verified with 50 automated tests in the FirstFix MCP test suite.
+- [x] Verified with 85 automated tests in the FirstFix MCP test suite.
 - [x] Released under MIT License.

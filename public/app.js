@@ -314,8 +314,8 @@ function setupPostMessageBridge() {
       }
     } else if (data.method === 'ui/resize') {
       const height = data.params?.height;
-      if (height && iframe) {
-        const targetHeight = Math.max(420, Math.min(height, 680));
+      if (typeof height === 'number' && iframe) {
+        const targetHeight = Math.max(360, Math.ceil(height) + 28);
         iframe.style.height = `${targetHeight}px`;
       }
     } else if (data.method === 'tools/call') {
@@ -625,6 +625,26 @@ function loadMcpAppInIframe(uri, contextData = {}) {
     q.set('correlationToken', contextData.correlationToken);
   }
 
+  iframe.onload = () => {
+    const syncHeight = () => {
+      try {
+        const doc = iframe.contentWindow?.document;
+        if (doc) {
+          const docHeight = doc.documentElement?.scrollHeight || 0;
+          const bodyHeight = doc.body?.scrollHeight || 0;
+          const offsetHeight = doc.body?.offsetHeight || 0;
+          const bestHeight = Math.max(docHeight, bodyHeight, offsetHeight, 360);
+          iframe.style.height = (bestHeight + 28) + 'px';
+        }
+      } catch (e) {
+        // Cross-origin safety fallback
+      }
+    };
+    syncHeight();
+    setTimeout(syncHeight, 100);
+    setTimeout(syncHeight, 350);
+  };
+
   iframe.src = `/api/mcp-apps/${appName}?${q.toString()}`;
 }
 
@@ -703,11 +723,15 @@ async function refreshFleetStatus(activeOemPartSku = null) {
           return `
           <div class="van-box ${statusClass}">
             <div class="van-header">
-              <div>
-                <div class="van-name">${van.companyName} (${van.vanId})</div>
-                <div class="van-tech">Tech: <strong>${van.technicianName}</strong> • ${van.rating}★ (${van.zipCodesCovered.length} ZIPs)</div>
+              <div class="van-header-row1">
+                <div>
+                  <div class="van-name">${van.companyName} (${van.vanId})</div>
+                  <div class="van-tech">Tech: <strong>${van.technicianName}</strong> • ${van.rating}★ (${van.zipCodesCovered.length} ZIPs)</div>
+                </div>
               </div>
-              <span class="van-status-badge ${badgeClass}">${badgeText}</span>
+              <div class="van-header-row2">
+                <span class="van-status-badge ${badgeClass}">${badgeText}</span>
+              </div>
             </div>
             <table class="sku-table">
               <thead>

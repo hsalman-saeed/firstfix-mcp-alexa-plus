@@ -118,5 +118,8 @@ curl -X POST https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aw
 ## 9. OPEN SOURCE CONTRIBUTIONS
 1. **`alexa-plus-ucp-mcp-kit` (Standalone npm package in `packages/alexa-plus-ucp-mcp-kit`):**  
    MIT-licensed zero-dependency toolkit providing header normalization, 24-hour UCP idempotency store, UCP envelope generator, cryptographic correlation token bridge, and MCP App iframe bridge script.
-2. **`AmazonAppDev/devices-agent-skills` Contribution Bundle (`open-source-contribution/devices-agent-skills/`):**  
-   Standard `agentskills.io` compliant Agent Skill teaching AI coding agents how to build Alexa+ Add-Ons, MCP servers, and UCP checkout without hitting common friction pitfalls.
+2. **`AmazonAppDev/devices-agent-skills` Contribution Bundle & PR #14 (`open-source-contribution/devices-agent-skills/`):**  
+   - **Official Open Pull Request:** [AmazonAppDev/devices-agent-skills PR #14](https://github.com/AmazonAppDev/devices-agent-skills/pull/14)
+   - **Public GitHub Repository:** [https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus](https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus)
+   - **Live AWS us-east-1 Endpoint:** [https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/)
+   - Standard `agentskills.io` compliant Agent Skill teaching AI coding agents how to build Alexa+ Add-Ons, MCP servers, and UCP checkout without hitting common friction pitfalls.

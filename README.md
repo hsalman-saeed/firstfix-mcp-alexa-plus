@@ -6,7 +6,7 @@
 [![MCP 2025-11-25](https://img.shields.io/badge/MCP-2025--11--25_Streamable_HTTP-0A84FF)](https://modelcontextprotocol.io/)
 [![UCP 2026-01-11](https://img.shields.io/badge/UCP-2026--01--11_Checkout-00C7BE)](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/ucp)
 [![OAuth 2.1 PKCE](https://img.shields.io/badge/OAuth_2.1-RFC_7636_PKCE_S256-blueviolet)](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/oauth-authorization-server)
-[![Tests Passing](https://img.shields.io/badge/Tests-75%2F75_Passing-34C759)](tests/)
+[![Tests Passing](https://img.shields.io/badge/Tests-85%2F85_Passing-34C759)](tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **Amazon Developer Hackathon 2026 Entry**  
@@ -154,14 +154,17 @@ An MIT-licensed, zero-dependency TypeScript toolkit that solves the top 5 protoc
 - `buildMcpAppPostMessageScript()`: Generates the client-side JSON-RPC 2.0 `window.parent.postMessage` bridge (`ui/initialize`, `ui/message`, `ui/update-context`) for `text/html;profile=mcp-app` visual cards.
 - `validateAddonImageDimensions()`: Validates PNG IHDR binary headers to prevent store submission rejection.
 
-👉 **Explore the SDK:** [`packages/alexa-plus-ucp-mcp-kit/README.md`](packages/alexa-plus-ucp-mcp-kit/README.md)
+👉 **Explore the Standalone SDK:** [`packages/alexa-plus-ucp-mcp-kit/README.md`](packages/alexa-plus-ucp-mcp-kit/README.md) (`alexa-plus-ucp-mcp-kit`)
 
 ### 2. Community Agent Skill: `AmazonAppDev/devices-agent-skills`
-A ready-to-merge contribution bundle for `https://github.com/AmazonAppDev/devices-agent-skills`:
+Official Open Pull Request: [AmazonAppDev/devices-agent-skills PR #14](https://github.com/AmazonAppDev/devices-agent-skills/pull/14)  
+Repository: [https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus](https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus)  
+Live AWS us-east-1 Deployment: [https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/)
+
 - Standard `agentskills.io` compliant instructions teaching AI coding assistants (Claude Code, Cursor, Antigravity) how to build Alexa+ Add-Ons and UCP servers without friction.
 - Complete pull request template ready for submission.
 
-👉 **View Contribution Bundle:** [`open-source-contribution/devices-agent-skills/`](open-source-contribution/devices-agent-skills/)
+👉 **View Contribution Bundle:** [`open-source-contribution/devices-agent-skills/`](open-source-contribution/devices-agent-skills/) | [Official PR #14 on GitHub](https://github.com/AmazonAppDev/devices-agent-skills/pull/14)
 
 ---
 

@@ -230,31 +230,36 @@ body {
   padding: 0 4px;
 }
 
-/* Command Center Split Screen (100% Zoom Responsive Layout) */
+/* Command Center Split Screen (100% Zoom Responsive Layout & Zero Overflow Guarantee) */
 .command-center {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: 16px;
-  padding: 14px 18px;
+  grid-template-columns: minmax(0, 50%) minmax(0, 50%); /* fractional grid base: minmax(0, 1.05fr) minmax(0, 0.95fr) */
+  gap: 14px;
+  padding: 8px 14px;
   flex: 1;
-  max-width: 1600px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   width: 100%;
   box-sizing: border-box;
   align-items: start;
 }
 
-@media (max-width: 1180px) {
+@media (max-width: 1150px) {
   .command-center {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 100%);
   }
 }
 
-.panel-left, .panel-right {
+.panel-left, .panel-right, .left-panel, .right-panel, .tab-content, .panel-card, .controls-card, .control-panel-unified {
   display: flex;
   flex-direction: column;
   gap: 14px;
   min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .panel-header {
@@ -494,15 +499,22 @@ body {
 }
 
 /* Echo Show 15 Device Bezel */
+/* Echo Show 15 Device Bezel & Zero-Clipping Screen Container */
 .echo-show-bezel {
   background: #020617;
   border: 14px solid #0f172a;
   border-radius: 20px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px #1e293b;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  height: auto;
+  max-height: none !important;
 }
 
 .bezel-camera {
@@ -516,10 +528,14 @@ body {
 
 .echo-screen {
   background: #070B14;
-  height: 520px;
+  height: auto;
+  min-height: 400px;
+  max-height: none !important;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .echo-voice-bar {
@@ -578,13 +594,24 @@ body {
   flex: 1;
   position: relative;
   background: #080C14;
+  width: 100%;
+  height: auto;
+  min-height: 380px;
+  overflow: visible;
+  box-sizing: border-box;
 }
 
-.iframe-container iframe {
+.iframe-container iframe,
+#mcp-app-iframe {
   width: 100%;
-  height: 100%;
+  min-width: 100%;
   border: none;
   background: #080C14;
+  display: block;
+  height: 480px;
+  max-height: none !important;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .device-bottom-bar {
@@ -713,48 +740,77 @@ body {
   color: #cbd5e1;
 }
 
-/* Fleet Cards */
-.fleet-cards {
+/* Fleet Cards & Grid (Zero Overflow Guarantee) */
+.fleet-cards, .fleet-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-@media (max-width: 700px) {
-  .fleet-cards { grid-template-columns: 1fr; }
+@media (max-width: 1360px) {
+  .fleet-cards, .fleet-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-.van-box {
+.van-box, .van-card {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
   border-radius: 10px;
-  padding: 14px;
+  padding: 12px;
   position: relative;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-.van-box.stocked {
+.van-box.stocked, .van-card.stocked {
   border-color: rgba(16, 185, 129, 0.4);
 }
 
-.van-box.unstocked {
+.van-box.unstocked, .van-card.unstocked {
   border-color: rgba(239, 68, 68, 0.3);
-  opacity: 0.75;
+  opacity: 0.85;
 }
 
 .van-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 10px;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-.van-title {
+.van-header-row1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.van-header-row2 {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.van-title, .van-name {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   color: #fff;
 }
 
-.van-sub {
+.van-sub, .van-tech {
   font-size: 11px;
   color: var(--text-muted);
 }
@@ -762,11 +818,16 @@ body {
 .van-status-badge {
   font-size: 10px;
   font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 999px;
+  padding: 4px 8px;
+  border-radius: 6px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 1.3;
+  box-sizing: border-box;
 }
 
 .van-status-badge.green {
@@ -784,10 +845,12 @@ body {
 /* Fleet Inventory SKU Table & Column Spacing */
 .sku-table {
   width: 100%;
+  max-width: 100%;
   font-size: 11px;
   border-collapse: collapse;
   table-layout: fixed;
   margin-top: 8px;
+  box-sizing: border-box;
 }
 
 .sku-table th {
@@ -799,11 +862,16 @@ body {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-.sku-table th:nth-child(1) { width: 34%; }
-.sku-table th:nth-child(2) { width: 42%; }
-.sku-table th:nth-child(3) { width: 24%; text-align: right; }
+.sku-table th:nth-child(1) { width: 32%; }
+.sku-table th:nth-child(2) { width: 48%; }
+.sku-table th:nth-child(3) { width: 20%; text-align: right; }
 
 .sku-table td {
   padding: 6px 8px;
@@ -1414,26 +1482,77 @@ body {
 
 .btn-test-fsm:hover { background: var(--green); color: #04101e; }
 
-.fsm-table, .dynamo-table {
+.table-container {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
 }
 
-.fsm-table th, .dynamo-table th {
+.fsm-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  table-layout: fixed;
+  box-sizing: border-box;
+}
+
+.fsm-table th, .fsm-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #162035;
+  color: #e2e8f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.fsm-table th {
   background: #0d1526;
   color: #94a3b8;
   text-align: left;
-  padding: 8px 12px;
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
   border-bottom: 1px solid var(--border-card);
 }
 
-.fsm-table td, .dynamo-table td {
-  padding: 8px 12px;
+.fsm-table th:nth-child(1), .fsm-table td:nth-child(1) { width: 14%; }
+.fsm-table th:nth-child(2), .fsm-table td:nth-child(2) { width: 14%; }
+.fsm-table th:nth-child(3), .fsm-table td:nth-child(3) { width: 20%; }
+.fsm-table th:nth-child(4), .fsm-table td:nth-child(4) { width: 14%; }
+.fsm-table th:nth-child(5), .fsm-table td:nth-child(5) { width: 16%; }
+.fsm-table th:nth-child(6), .fsm-table td:nth-child(6) { width: 10%; text-align: right; }
+.fsm-table th:nth-child(7), .fsm-table td:nth-child(7) { width: 12%; text-align: center; }
+
+.dynamo-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  table-layout: fixed;
+  box-sizing: border-box;
+}
+
+.dynamo-table th, .dynamo-table td {
+  padding: 8px 6px;
   border-bottom: 1px solid #162035;
   color: #e2e8f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.dynamo-table th {
+  background: #0d1526;
+  color: #94a3b8;
+  text-align: left;
+  font-size: 10px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border-card);
 }
 
 /* Simulated Ring Battery Doorbell Pro HD Card */
