@@ -188,6 +188,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Automatically execute Scenario 1 (Bosch FD99 Happy Path) immediately on boot
   // so all controls, input, iframe, and fleet matrix are 100% in sync within <100ms
   await selectAndRunScenario(1, false);
+  fetchHouseholdRegistry();
   showToast('FirstFix MCP Ready', 'Dual-Screen Echo Show 15 Simulator & AWS us-east-1 telemetry active.', 'success');
 });
 
@@ -204,6 +205,7 @@ function setupTabs() {
 
       if (targetId === 'tab-aws') {
         fetchDynamoRecords();
+        fetchHouseholdRegistry();
       } else if (targetId === 'tab-fleet') {
         refreshFleetStatus();
       }
@@ -262,6 +264,10 @@ function setupEventListeners() {
     fetchDynamoRecords();
   });
 
+  document.getElementById('btn-refresh-household')?.addEventListener('click', () => {
+    fetchHouseholdRegistry();
+  });
+
   // Custom Image Upload
   btnTriggerUpload?.addEventListener('click', () => {
     inputPlateFile?.click();
@@ -313,10 +319,11 @@ function setupPostMessageBridge() {
         }
       }
     } else if (data.method === 'ui/resize') {
-      const height = data.params?.height;
-      if (typeof height === 'number' && iframe) {
-        const targetHeight = Math.max(360, Math.ceil(height) + 28);
-        iframe.style.height = `${targetHeight}px`;
+      const rawH = Number(data.params?.height) || 480;
+      const targetHeight = Math.min(640, Math.max(420, Math.ceil(rawH)));
+      const currentHeight = parseInt(iframe.style.height || '0', 10);
+      if (Math.abs(targetHeight - currentHeight) > 4) {
+        iframe.style.height = targetHeight + 'px';
       }
     } else if (data.method === 'tools/call') {
       console.log('[Host Bridge] Tool Call requested from MCP App:', data.params);
@@ -576,6 +583,7 @@ async function runOrchestration(overrides = {}) {
 
     // Refresh Fleet Console with the live active part SKU
     await refreshFleetStatus(activeSku);
+    await fetchHouseholdRegistry();
   } catch (err) {
     animateWaveform(false);
     if (cameraLed) cameraLed.classList.remove('active');
@@ -630,19 +638,20 @@ function loadMcpAppInIframe(uri, contextData = {}) {
       try {
         const doc = iframe.contentWindow?.document;
         if (doc) {
-          const docHeight = doc.documentElement?.scrollHeight || 0;
-          const bodyHeight = doc.body?.scrollHeight || 0;
-          const offsetHeight = doc.body?.offsetHeight || 0;
-          const bestHeight = Math.max(docHeight, bodyHeight, offsetHeight, 360);
-          iframe.style.height = (bestHeight + 28) + 'px';
+          const root = doc.getElementById('mcp-app-root') || doc.body?.firstElementChild;
+          const h = root ? (root.offsetHeight + 28) : 480;
+          const targetHeight = Math.min(640, Math.max(420, Math.ceil(h)));
+          const currentHeight = parseInt(iframe.style.height || '0', 10);
+          if (Math.abs(targetHeight - currentHeight) > 4) {
+            iframe.style.height = targetHeight + 'px';
+          }
         }
       } catch (e) {
         // Cross-origin safety fallback
       }
     };
     syncHeight();
-    setTimeout(syncHeight, 100);
-    setTimeout(syncHeight, 350);
+    setTimeout(syncHeight, 150);
   };
 
   iframe.src = `/api/mcp-apps/${appName}?${q.toString()}`;
@@ -888,6 +897,50 @@ async function fetchDynamoRecords() {
   }
 }
 
+// Queries and Renders Household Equipment & Active Warranty Registry (Zero-Repeat-Question Memory)
+async function fetchHouseholdRegistry() {
+  const tbody = document.getElementById('household-registry-tbody');
+  if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#38bdf8;">Querying Household Equipment Registry &amp; Active Warranties...</td></tr>';
+  }
+
+  try {
+    const res = await fetch('/api/household/registry');
+    const data = await res.json();
+
+    if (!tbody) return;
+
+    if (!data.appliances || data.appliances.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#64748b;">No registered appliances found in memory.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.appliances
+      .map((app) => {
+        const isUnder = app.warrantyStatus === 'UNDER_WARRANTY';
+        const badgeStyle = isUnder
+          ? 'background:rgba(16,185,129,0.15); color:#10B981; border:1px solid #10B981; padding:2px 6px; border-radius:4px; font-weight:700;'
+          : 'background:rgba(239,68,68,0.15); color:#EF4444; border:1px solid #EF4444; padding:2px 6px; border-radius:4px; font-weight:700;';
+
+        return `
+          <tr>
+            <td style="font-weight:600; color:#cbd5e1;">${app.category || 'Appliance'}</td>
+            <td><strong style="color:#fff;">${app.brand || ''}</strong> <span style="font-family:monospace; color:#38bdf8;">${app.modelNumber || ''}</span></td>
+            <td style="font-family:monospace; color:#94a3b8;">${app.serialNumber || 'N/A'}</td>
+            <td style="color:#94a3b8; font-size:11px;">${app.installDateIso ? app.installDateIso.slice(0, 10) : 'N/A'}</td>
+            <td><span style="${badgeStyle}">${isUnder ? '✓ ACTIVE WARRANTY' : 'EXPIRED'}</span></td>
+            <td style="font-family:monospace; color:${app.lastDiagnosedSku ? '#34d399' : '#64748b'};">${app.lastDiagnosedSku || '—'}</td>
+          </tr>
+        `;
+      })
+      .join('');
+  } catch (err) {
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--red);">Error querying household registry: ${String(err)}</td></tr>`;
+    }
+  }
+}
+
 // Performs Initial OAuth 2.1 PKCE Token Exchange on Boot
 async function performInitialOAuthTokenFetch() {
   try {
@@ -1039,6 +1092,7 @@ async function resetDemoState() {
 
     showToast('Demo State Reset', 'Clean seed restored, van inventory reset, DynamoDB demo items purged.', 'info');
     await refreshFleetStatus();
+    await fetchHouseholdRegistry();
   } catch (err) {
     console.error('Reset failed:', err);
     showToast('Reset Error', String(err), 'error');

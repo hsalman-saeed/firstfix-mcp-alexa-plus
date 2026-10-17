@@ -91,11 +91,11 @@ export function renderDiagnosticIntakeHtml(params: TemplateParams = {}): string 
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding: 14px 16px;
-      padding-bottom: 24px;
+      margin: 0;
+      padding: 12px;
       line-height: 1.45;
-      height: auto;
-      min-height: 100%;
+      height: auto !important;
+      min-height: 0 !important;
       overflow-x: hidden;
       overflow-y: auto;
       box-sizing: border-box;
@@ -273,6 +273,7 @@ export function renderDiagnosticIntakeHtml(params: TemplateParams = {}): string 
   </style>
 </head>
 <body>
+  <div id="mcp-app-root">
   <div class="header">
     <div class="logo">
       <span>FirstFix</span>
@@ -365,32 +366,26 @@ export function renderDiagnosticIntakeHtml(params: TemplateParams = {}): string 
         <button class="btn btn-outline" id="btn-rescan" style="flex:1;">🔄 Rescan Image</button>
         <button class="btn" id="btn-proceed" style="flex:1;">View Stocked Vans ➔</button>
       </div>
-    </div>
+  </div>
   </div>
 
   <script>
-    function sendResize() {
-      const h = Math.max(
-        document.body ? document.body.scrollHeight : 0,
-        document.documentElement ? document.documentElement.scrollHeight : 0,
-        document.body ? document.body.offsetHeight : 0,
-        360
-      );
-      window.parent.postMessage({
-        jsonrpc: '2.0',
-        method: 'ui/resize',
-        params: { height: h }
-      }, '*');
+    function notifyHeight() {
+      const root = document.getElementById('mcp-app-root') || document.body.firstElementChild;
+      const h = root ? (root.offsetHeight + 28) : 480;
+      if (!window.__lastSentHeight || Math.abs(h - window.__lastSentHeight) > 6) {
+        window.__lastSentHeight = h;
+        window.parent.postMessage({
+          jsonrpc: '2.0',
+          method: 'ui/resize',
+          params: { height: h }
+        }, '*');
+      }
     }
 
     window.addEventListener('load', () => {
-      sendResize();
-      setTimeout(sendResize, 50);
-      setTimeout(sendResize, 250);
-      setTimeout(sendResize, 600);
-      if (window.ResizeObserver && document.body) {
-        new ResizeObserver(() => sendResize()).observe(document.body);
-      }
+      notifyHeight();
+      setTimeout(notifyHeight, 150);
       window.parent.postMessage({
         jsonrpc: '2.0',
         method: 'ui/initialize',
@@ -402,7 +397,7 @@ export function renderDiagnosticIntakeHtml(params: TemplateParams = {}): string 
       }, '*');
     });
 
-    window.addEventListener('resize', sendResize);
+    window.addEventListener('resize', notifyHeight);
 
     // Confirmation Button sends verified serial event to Host
     document.getElementById('btn-confirm-serial')?.addEventListener('click', () => {
@@ -686,11 +681,11 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding: 12px 16px;
-      padding-bottom: 24px;
+      margin: 0;
+      padding: 12px;
       line-height: 1.45;
-      height: auto;
-      min-height: 100%;
+      height: auto !important;
+      min-height: 0 !important;
       overflow-x: hidden;
       overflow-y: auto;
       box-sizing: border-box;
@@ -822,6 +817,7 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
   </style>
 </head>
 <body>
+  <div id="mcp-app-root">
   <div class="header">
     <div style="font-weight:700; font-size:15px; color:var(--cyan);">
       FirstFix | Verified Stocked Contractor Network
@@ -852,19 +848,25 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
   <div class="van-carousel">
     ${vanCardsHtml}
   </div>
+  </div>
 
   <script>
     function notifyHeight() {
-      const h = document.documentElement.scrollHeight || document.body.scrollHeight;
-      window.parent.postMessage({
-        jsonrpc: '2.0',
-        method: 'ui/resize',
-        params: { height: Math.max(h + 20, 420) }
-      }, '*');
+      const root = document.getElementById('mcp-app-root') || document.body.firstElementChild;
+      const h = root ? (root.offsetHeight + 28) : 480;
+      if (!window.__lastSentHeight || Math.abs(h - window.__lastSentHeight) > 6) {
+        window.__lastSentHeight = h;
+        window.parent.postMessage({
+          jsonrpc: '2.0',
+          method: 'ui/resize',
+          params: { height: h }
+        }, '*');
+      }
     }
 
     window.addEventListener('load', () => {
       notifyHeight();
+      setTimeout(notifyHeight, 150);
       window.parent.postMessage({
         jsonrpc: '2.0',
         method: 'ui/initialize',
@@ -877,7 +879,6 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
     });
 
     window.addEventListener('resize', notifyHeight);
-    setTimeout(notifyHeight, 150);
 
     // 1-Tap UCP Checkout Trigger via postMessage
     function triggerCheckout(slotId, vanId, techName, fee, btnElement) {
@@ -917,41 +918,6 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
         }
       }, 700);
     }
-
-    function sendResize() {
-      const h = Math.max(
-        document.body ? document.body.scrollHeight : 0,
-        document.documentElement ? document.documentElement.scrollHeight : 0,
-        document.body ? document.body.offsetHeight : 0,
-        360
-      );
-      window.parent.postMessage({
-        jsonrpc: '2.0',
-        method: 'ui/resize',
-        params: { height: h }
-      }, '*');
-    }
-
-    window.addEventListener('load', () => {
-      sendResize();
-      setTimeout(sendResize, 50);
-      setTimeout(sendResize, 250);
-      setTimeout(sendResize, 600);
-      if (window.ResizeObserver && document.body) {
-        new ResizeObserver(() => sendResize()).observe(document.body);
-      }
-      window.parent.postMessage({
-        jsonrpc: '2.0',
-        method: 'ui/initialize',
-        params: {
-          appUri: 'ui://firstfix/stocked-pro-carousel.html',
-          version: '1.0.0',
-          capabilities: ['tools/call', 'ui/message', 'ui/resize']
-        }
-      }, '*');
-    });
-
-    window.addEventListener('resize', sendResize);
   </script>
 </body>
 </html>`;
@@ -988,19 +954,17 @@ export function renderEmergencyShutoffHtml(params: TemplateParams = {}): string 
     ::-webkit-scrollbar-track { background: #1a0a0a; }
     ::-webkit-scrollbar-thumb { background: #551b1b; border-radius: 3px; }
     html, body {
-      height: auto;
-      min-height: 100%;
-      box-sizing: border-box;
-      overflow-x: hidden;
-      overflow-y: auto;
-      padding-bottom: 24px;
-    }
-    body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding: 14px 16px 24px 16px;
+      margin: 0;
+      padding: 12px;
       line-height: 1.45;
+      height: auto !important;
+      min-height: 0 !important;
+      overflow-x: hidden;
+      overflow-y: auto;
+      box-sizing: border-box;
     }
     .banner {
       background: var(--red);
@@ -1075,6 +1039,7 @@ export function renderEmergencyShutoffHtml(params: TemplateParams = {}): string 
   </style>
 </head>
 <body>
+  <div id="mcp-app-root">
   <div class="banner">
     <span style="font-size:22px;">🚨</span>
     <div>
@@ -1114,30 +1079,25 @@ export function renderEmergencyShutoffHtml(params: TemplateParams = {}): string 
       <button class="btn-emergency" style="background:#7f1d1d;" id="btn-sound-alert">🔊 Toggle Alert Tone</button>
     </div>
   </div>
+  </div>
 
   <script>
-    function sendResize() {
-      const h = Math.max(
-        document.body ? document.body.scrollHeight : 0,
-        document.documentElement ? document.documentElement.scrollHeight : 0,
-        document.body ? document.body.offsetHeight : 0,
-        360
-      );
-      window.parent.postMessage({
-        jsonrpc: '2.0',
-        method: 'ui/resize',
-        params: { height: h }
-      }, '*');
+    function notifyHeight() {
+      const root = document.getElementById('mcp-app-root') || document.body.firstElementChild;
+      const h = root ? (root.offsetHeight + 28) : 480;
+      if (!window.__lastSentHeight || Math.abs(h - window.__lastSentHeight) > 6) {
+        window.__lastSentHeight = h;
+        window.parent.postMessage({
+          jsonrpc: '2.0',
+          method: 'ui/resize',
+          params: { height: h }
+        }, '*');
+      }
     }
 
     window.addEventListener('load', () => {
-      sendResize();
-      setTimeout(sendResize, 50);
-      setTimeout(sendResize, 250);
-      setTimeout(sendResize, 600);
-      if (window.ResizeObserver && document.body) {
-        new ResizeObserver(() => sendResize()).observe(document.body);
-      }
+      notifyHeight();
+      setTimeout(notifyHeight, 150);
       window.parent.postMessage({
         jsonrpc: '2.0',
         method: 'ui/initialize',
@@ -1149,8 +1109,7 @@ export function renderEmergencyShutoffHtml(params: TemplateParams = {}): string 
       }, '*');
     });
 
-    window.addEventListener('resize', sendResize);
-    setTimeout(sendResize, 150);
+    window.addEventListener('resize', notifyHeight);
 
     // Web Audio Warning Tone Generator
     let audioCtx = null;

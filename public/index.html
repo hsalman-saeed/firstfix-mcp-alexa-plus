@@ -499,6 +499,36 @@
             </table>
           </div>
         </div>
+
+        <!-- Household Equipment & Active Warranty Registry (Zero-Repeat-Question Memory) -->
+        <div class="dynamo-inspector-card" id="household-registry-card" style="margin-top: 14px;">
+          <div class="dynamo-header">
+            <div>
+              <span class="dynamo-title">🏠 Household Equipment &amp; Active Warranty Registry (Zero-Repeat-Question Memory)</span>
+              <span class="dynamo-sub">Pre-registered &amp; auto-discovered home appliances with active OEM warranty countdown &amp; repair history</span>
+            </div>
+            <button class="btn-query-dynamo" id="btn-refresh-household">
+              🔄 Refresh Registry
+            </button>
+          </div>
+          <div class="table-container">
+            <table class="dynamo-table" id="household-registry-table">
+              <thead>
+                <tr>
+                  <th style="width: 14%;">Category</th>
+                  <th style="width: 22%;">Brand &amp; Model</th>
+                  <th style="width: 18%;">Serial Number</th>
+                  <th style="width: 14%;">Install Date</th>
+                  <th style="width: 16%;">Warranty Status</th>
+                  <th style="width: 16%;">Last Diagnosed SKU</th>
+                </tr>
+              </thead>
+              <tbody id="household-registry-tbody">
+                <tr><td colspan="6" style="text-align:center; color:#64748b;">Loading registered appliances...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </section>
   </main>

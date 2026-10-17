@@ -40,6 +40,7 @@ import {
   clearFsmDispatches,
   recordFsmDispatch,
 } from './fsmWebhook.js';
+import { defaultStorage } from '../storage/storageAdapter.js';
 
 export interface AppOptions {
   publicBaseUrl?: string;
@@ -202,6 +203,39 @@ export function createApp(options: AppOptions = {}): Express {
         });
       }
 
+      // Automatically update/persist diagnosed appliance in Household Registry
+      if (result.extractedPlate?.brand && result.extractedPlate?.modelNumber) {
+        const brand = result.extractedPlate.brand;
+        const model = result.extractedPlate.modelNumber;
+        const serial = result.extractedPlate.serialNumber || 'UNKNOWN_SERIAL';
+        const sku = result.bomResolution?.oemPartSku || result.bomResult?.oemPartSku;
+        const existingList = await defaultStorage.getHouseholdEquipment('household_demo_001');
+        const match = existingList.find((e) => e.brand.toLowerCase() === brand.toLowerCase() || e.modelNumber === model);
+        if (match) {
+          match.serialNumber = serial;
+          match.lastServiceDateIso = new Date().toISOString();
+          match.updatedAtIso = new Date().toISOString();
+          match.notes = `Diagnosed Part: ${sku || 'Inspected'} (${new Date().toLocaleDateString()})`;
+          (match as any).lastDiagnosedSku = sku;
+          await defaultStorage.saveEquipmentRecord(match);
+        } else {
+          const newEq = {
+            householdId: 'household_demo_001',
+            equipmentId: `eq_${brand.toLowerCase()}_${Date.now().toString().slice(-4)}`,
+            brand,
+            modelNumber: model,
+            serialNumber: serial,
+            category: (brand === 'Carrier' ? 'AC_CONDENSER' : brand === 'Rheem' ? 'WATER_HEATER' : 'DISHWASHER') as any,
+            installDateIso: '2024-01-01T00:00:00Z',
+            notes: `Diagnosed Part: ${sku || 'Inspected'} (${new Date().toLocaleDateString()})`,
+            lastServiceDateIso: new Date().toISOString(),
+            updatedAtIso: new Date().toISOString(),
+          };
+          (newEq as any).lastDiagnosedSku = sku;
+          await defaultStorage.saveEquipmentRecord(newEq);
+        }
+      }
+
       res.json(result);
     } catch (err) {
       console.error('[AI Orchestrator Error]', err);
@@ -216,9 +250,45 @@ export function createApp(options: AppOptions = {}): Express {
     appState.resetAppState();
     clearFsmDispatches();
     clearDemoRecordsInDynamoDB().catch(() => {});
+    defaultStorage.resetToSeed();
     res.json({
       status: 'reset_complete',
       timestamp: new Date().toISOString(),
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // Household Equipment & Active Warranty Registry ("Zero-Repeat-Question Memory")
+  // --------------------------------------------------------------------------
+  app.get('/api/household/registry', async (_req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'no-store');
+    const appliances = await defaultStorage.getHouseholdEquipment('household_demo_001');
+    const augmented = appliances.map((appliance) => {
+      let warrantyStatus = 'UNDER_WARRANTY';
+      const installYear = appliance.installDateIso ? new Date(appliance.installDateIso).getFullYear() : 2024;
+      const ageYears = 2026 - installYear;
+      const coverageYears = appliance.brand === 'Carrier' ? 10 : appliance.brand === 'Rheem' ? 6 : 2;
+      if (appliance.notes?.includes('EXPIRED') || ageYears > coverageYears) {
+        warrantyStatus = 'EXPIRED';
+      }
+      let lastDiagnosedSku = (appliance as any).lastDiagnosedSku;
+      if (!lastDiagnosedSku && appliance.notes && appliance.notes.includes('Diagnosed Part: ')) {
+        const m = appliance.notes.match(/Diagnosed Part:\s*([^\s(]+)/);
+        if (m) lastDiagnosedSku = m[1];
+      }
+      return {
+        ...appliance,
+        warrantyStatus,
+        coverageYears,
+        lastDiagnosedSku: lastDiagnosedSku || null,
+      };
+    });
+
+    res.json({
+      success: true,
+      householdId: 'household_demo_001',
+      totalAppliances: augmented.length,
+      appliances: augmented,
     });
   });
 
