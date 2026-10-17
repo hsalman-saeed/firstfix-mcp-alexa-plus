@@ -1,6 +1,6 @@
 {
   "name": "alexa-plus-ucp-mcp-kit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Production-grade, reusable TypeScript toolkit for Alexa+ Add-Ons, MCP 2025-11-25 Streamable HTTP, MCP Apps (ui://), Universal Commerce Protocol (UCP), and Local Booking SPI integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
