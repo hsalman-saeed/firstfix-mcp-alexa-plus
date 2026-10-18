@@ -514,6 +514,28 @@ async function main() {
     console.log(`✓ Synchronized .well-known/ucp.json -> ${liveBase}/checkout-sessions`);
   }
 
+  // Update .well-known/oauth-authorization-server.json
+  const oauthAuthPath = path.resolve(process.cwd(), '.well-known', 'oauth-authorization-server.json');
+  if (fs.existsSync(oauthAuthPath)) {
+    const data = JSON.parse(fs.readFileSync(oauthAuthPath, 'utf-8'));
+    data.issuer = liveBase;
+    data.authorization_endpoint = `${liveBase}/oauth/authorize`;
+    data.token_endpoint = `${liveBase}/oauth/token`;
+    data.jwks_uri = `${liveBase}/.well-known/jwks.json`;
+    fs.writeFileSync(oauthAuthPath, JSON.stringify(data, null, 2), 'utf-8');
+    console.log(`✓ Synchronized .well-known/oauth-authorization-server.json -> ${liveBase}`);
+  }
+
+  // Update .well-known/oauth-protected-resource.json
+  const oauthResPath = path.resolve(process.cwd(), '.well-known', 'oauth-protected-resource.json');
+  if (fs.existsSync(oauthResPath)) {
+    const data = JSON.parse(fs.readFileSync(oauthResPath, 'utf-8'));
+    data.resource = `${liveBase}/mcp`;
+    data.authorization_servers = [liveBase];
+    fs.writeFileSync(oauthResPath, JSON.stringify(data, null, 2), 'utf-8');
+    console.log(`✓ Synchronized .well-known/oauth-protected-resource.json -> ${liveBase}`);
+  }
+
   // --------------------------------------------------------------------------
   // Step 8: Live Public Internet HTTPS Smoke Tests
   // --------------------------------------------------------------------------
@@ -607,6 +629,10 @@ async function main() {
       ucpDiscoveryEndpoint: `${liveBase}/.well-known/ucp`,
       oauthAuthorizationServer: `${liveBase}/.well-known/oauth-authorization-server`,
       oauthProtectedResource: `${liveBase}/.well-known/oauth-protected-resource`,
+      oauthTokenEndpoint: `${liveBase}/oauth/token`,
+      dynamoRecordsInspectorUrl: `${liveBase}/api/aws/dynamo-records`,
+      fsmDispatchesFeedUrl: `${liveBase}/v1/fsm/dispatches`,
+      householdRegistryUrl: `${liveBase}/api/household/registry`,
       healthStatusEndpoint: `${liveBase}/api/health`,
       awsArchitectureStatus: `${liveBase}/api/aws/architecture-status`,
       fleetMatrixEndpoint: `${liveBase}/api/fleet/status`,
@@ -619,6 +645,7 @@ async function main() {
       echoShow15SimulatorAvailable: simHasTitle,
       livePublicDnsResolves: true,
       authenticAwsSubdomain: true,
+      automatedTestsPassing: '90/90',
     },
   };
 

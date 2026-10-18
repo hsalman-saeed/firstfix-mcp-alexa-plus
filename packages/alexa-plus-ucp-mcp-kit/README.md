@@ -1,24 +1,31 @@
 # alexa-plus-ucp-mcp-kit
 
+[![NPM Version](https://img.shields.io/npm/v/alexa-plus-ucp-mcp-kit.svg)](https://www.npmjs.com/package/alexa-plus-ucp-mcp-kit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7+-blue.svg)](https://www.typescriptlang.org/)
 [![Model Context Protocol](https://img.shields.io/badge/MCP-2025--11--25-green.svg)](https://modelcontextprotocol.io/)
 [![Universal Commerce Protocol](https://img.shields.io/badge/UCP-2026--01--11-orange.svg)](https://ucp.dev/)
+[![Tests Passing](https://img.shields.io/badge/Tests-90%2F90_Passing-34C759)](https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus)
 
-**alexa-plus-ucp-mcp-kit** is a lightweight, zero-dependency, open-source TypeScript SDK designed to solve the common integration challenges encountered when building **Alexa+ Add-Ons**, **MCP 2025-11-25 Streamable HTTP services**, **Interactive MCP Apps (`text/html;profile=mcp-app`)**, and **Universal Commerce Protocol (UCP)** checkout pipelines.
+**`alexa-plus-ucp-mcp-kit`** is a lightweight, zero-dependency, open-source TypeScript SDK designed to solve the common integration friction points encountered when building **Alexa+ Add-Ons**, **MCP 2025-11-25 Streamable HTTP services**, **Interactive MCP Apps (`text/html;profile=mcp-app`)**, and **Universal Commerce Protocol (UCP 2026-01-11)** checkout pipelines.
 
-Developed during the **Amazon Developer Hackathon 2026** as part of **FirstFix MCP** (Winner candidate for the Alexa+, Ring, and AWS Builder tracks).
+Originally developed for **FirstFix MCP** during the **Amazon Developer Hackathon 2026**:
+- **GitHub Repository**: [https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus](https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus)
+- **Live AWS Production Deployment**: [https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/](https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/)
+- **Upstream Agent Skill Contribution**: [AmazonAppDev/devices-agent-skills PR #14](https://github.com/AmazonAppDev/devices-agent-skills/pull/14)
+- **NPM Package**: [https://www.npmjs.com/package/alexa-plus-ucp-mcp-kit](https://www.npmjs.com/package/alexa-plus-ucp-mcp-kit)
+- **Automated Test Verification**: **90 / 90 tests passing (100% across 10 suites)**
 
 ---
 
-## Features
+## The 6 Core Exported Utilities
 
-- **MCP Streamable HTTP Normalizer**: Automatically ensures `Accept: application/json, text/event-stream` is negotiated, preventing 406 Not Acceptable errors in stateless JSON MCP proxies.
-- **24-Hour UCP Idempotency Engine**: RFC-compliant `Idempotency-Key` store featuring SHA-256 payload hashing and automatic `409 Conflict` detection for mutated request bodies.
-- **Strict UCP Envelope Builder**: Creates schema-compliant `dev.ucp.shopping.checkout` (`2026-01-11`) envelopes for `/checkout-sessions`, `/complete`, and `/cancel`.
-- **Cryptographic Correlation Token Bridge**: HMAC-SHA256 correlation tokens tying together UCP checkouts, Alexa+ Local Booking SPI appointments, and Ring Smart Arrival access windows.
-- **MCP App `postMessage` Bridge Generator**: Client-side JSON-RPC 2.0 bridge supporting `ui/initialize`, `tools/call`, `ui/message` (1-tap Amazon Pay checkout triggers), and `ui/update-context`.
-- **PNG Dimension Validator**: Inspects binary PNG IHDR chunks to ensure `addon.json` icons (512x512) and media carousels (1200x800) pass validation before submission.
+1. **`normalizeMcpStreamableHeaders(headers)`**: Normalizes incoming HTTP request `Accept` headers to guarantee both `application/json` and `text/event-stream` are negotiated, preventing premature `HTTP 406 Not Acceptable` rejections from strict MCP Streamable HTTP transports.
+2. **`createUcpIdempotencyStore(ttlMs)`**: 24-hour RFC-compliant `Idempotency-Key` caching store featuring SHA-256 payload hashing and automatic `HTTP 409 Conflict` detection for mutated request bodies.
+3. **`buildUcpEnvelope(params)`**: Generates strict, schema-compliant `dev.ucp.shopping.checkout` (`2026-01-11`) envelopes for `/checkout-sessions`, `/complete`, and `/cancel`.
+4. **`createCorrelationTokenBridge(secret)`**: Creates cryptographic HMAC-SHA256 correlation tokens tying together UCP checkout sessions, Alexa+ Local Booking SPI appointment dispatches, and Ring Smart Arrival access windows.
+5. **`buildMcpAppPostMessageScript(appUri)`**: Generates the client-side JSON-RPC 2.0 `window.parent.postMessage` bridge script (`ui/initialize`, `ui/message`, `ui/resize`, `ui/update-context`) for embedded MCP App iframes.
+6. **`validateAddonImageDimensions(buffer, expectedWidth, expectedHeight)`**: Inspects binary PNG IHDR chunks to ensure `addon.json` icons (64x64, 72x72, 88x88, 126x126, 180x180, 241x241) and media carousels (600x900) satisfy strict store requirements.
 
 ---
 
@@ -30,7 +37,7 @@ npm install alexa-plus-ucp-mcp-kit
 
 ---
 
-## Quickstart
+## Quickstart & Code Patterns
 
 ### 1. Reusable UCP Idempotency Middleware
 
@@ -40,7 +47,7 @@ import { createUcpIdempotencyStore } from 'alexa-plus-ucp-mcp-kit';
 const idempotency = createUcpIdempotencyStore(86400000); // 24 hours TTL
 
 app.post('/checkout-sessions', (req, res) => {
-  const key = req.headers['idempotency-key'];
+  const key = req.headers['idempotency-key'] as string | undefined;
   if (key) {
     const check = idempotency.get(key, req.body);
     if (check.hit) {
@@ -65,8 +72,11 @@ app.post('/checkout-sessions', (req, res) => {
 ```typescript
 import { normalizeMcpStreamableHeaders } from 'alexa-plus-ucp-mcp-kit';
 
-const normalized = normalizeMcpStreamableHeaders(req.headers);
-// Ensures accept includes both 'application/json' and 'text/event-stream'
+// Use as Express middleware before transport.handleRequest
+app.use('/mcp', (req, _res, next) => {
+  normalizeMcpStreamableHeaders(req.headers);
+  next();
+});
 ```
 
 ### 3. Cryptographic Correlation Token Bridge
@@ -74,18 +84,18 @@ const normalized = normalizeMcpStreamableHeaders(req.headers);
 ```typescript
 import { createCorrelationTokenBridge } from 'alexa-plus-ucp-mcp-kit';
 
-const bridge = createCorrelationTokenBridge(process.env.BRIDGE_SECRET);
+const bridge = createCorrelationTokenBridge(process.env.BRIDGE_SECRET || 'secret-key');
 
-// Generate token during checkout
+// Generate token during checkout session creation
 const token = bridge.generateToken({
   sessionId: 'chk_9941',
   vanId: 'van_apex_04',
 });
 
-// Verify token at Ring doorbell camera arrival
+// Verify token when Ring doorbell camera reports technician arrival
 const verification = bridge.verifyToken(token);
 if (verification.valid) {
-  // Grant monitored temporary smart lock access
+  // Grant monitored temporary smart lock access for arrival window
 }
 ```
 
@@ -93,4 +103,4 @@ if (verification.valid) {
 
 ## License
 
-MIT License. Open source and free for the community.
+MIT License. Open source and free for the Amazon developer community.

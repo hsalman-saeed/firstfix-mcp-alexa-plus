@@ -1,7 +1,7 @@
 {
-  "resource": "https://mcp.firstfix.example.com/mcp",
+  "resource": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/mcp",
   "authorization_servers": [
-    "https://mcp.firstfix.example.com"
+    "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws"
   ],
   "scopes_supported": [
     "mcp:read",

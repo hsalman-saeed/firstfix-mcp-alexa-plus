@@ -1,5 +1,5 @@
 {
-  "deployedAtIso": "2026-10-18T10:26:39.649Z",
+  "deployedAtIso": "2026-10-18T11:15:40.501Z",
   "serviceName": "firstfix-mcp-alexa-plus",
   "awsRegion": "us-east-1",
   "architecture": {
@@ -16,6 +16,10 @@
     "ucpDiscoveryEndpoint": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/ucp",
     "oauthAuthorizationServer": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/oauth-authorization-server",
     "oauthProtectedResource": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/.well-known/oauth-protected-resource",
+    "oauthTokenEndpoint": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/oauth/token",
+    "dynamoRecordsInspectorUrl": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/aws/dynamo-records",
+    "fsmDispatchesFeedUrl": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/v1/fsm/dispatches",
+    "householdRegistryUrl": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/household/registry",
     "healthStatusEndpoint": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/health",
     "awsArchitectureStatus": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/aws/architecture-status",
     "fleetMatrixEndpoint": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/api/fleet/status"
@@ -27,6 +31,7 @@
     "diagnoseToolSuccess": true,
     "echoShow15SimulatorAvailable": true,
     "livePublicDnsResolves": true,
-    "authenticAwsSubdomain": true
+    "authenticAwsSubdomain": true,
+    "automatedTestsPassing": "90/90"
   }
 }

@@ -8,6 +8,15 @@
   "scripts": {
     "build": "tsc"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus.git",
+    "directory": "packages/alexa-plus-ucp-mcp-kit"
+  },
+  "homepage": "https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus#readme",
+  "bugs": {
+    "url": "https://github.com/hsalman-saeed/firstfix-mcp-alexa-plus/issues"
+  },
   "keywords": [
     "alexa-plus",
     "mcp",
@@ -18,6 +27,6 @@
     "local-booking-spi",
     "amazon-bedrock"
   ],
-  "author": "FirstFix MCP Team (Amazon Developer Hackathon 2026)",
+  "author": "Hafiz Salman Saeed (Amazon Developer Hackathon 2026)",
   "license": "MIT"
 }

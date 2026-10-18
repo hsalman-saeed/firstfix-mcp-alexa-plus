@@ -32,8 +32,8 @@
       }
     },
     "privacyAndCompliance": {
-      "privacyPolicyUrl": "https://firstfix.example.com/privacy",
-      "termsOfUseUrl": "https://firstfix.example.com/terms"
+      "privacyPolicyUrl": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/privacy",
+      "termsOfUseUrl": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/terms"
     },
     "mediaAssets": {
       "icons": {
@@ -63,7 +63,31 @@
             "type": "HTTPS",
             "uri": "https://qe2khmjs7zmipvuuk2ailnsq340lfhrg.lambda-url.us-east-1.on.aws/mcp"
           }
-        }
+        },
+        "resources": [
+          {
+            "uri": "ui://firstfix/diagnostic-intake.html",
+            "name": "Diagnostic Intake & Human Confirmation Card",
+            "mimeType": "text/html;profile=mcp-app"
+          },
+          {
+            "uri": "ui://firstfix/stocked-pro-carousel.html",
+            "name": "Stocked Pro Van Carousel & 1-Tap Booking Card",
+            "mimeType": "text/html;profile=mcp-app"
+          },
+          {
+            "uri": "ui://firstfix/emergency-shutoff.html",
+            "name": "Emergency Life-Safety Utility Shutoff Card",
+            "mimeType": "text/html;profile=mcp-app"
+          }
+        ],
+        "tools": [
+          "diagnose_equipment_and_bom",
+          "match_stocked_contractor_vans",
+          "execute_safe_precheck",
+          "initiate_ucp_deposit_checkout",
+          "provision_ring_arrival_pass"
+        ]
       }
     }
   ]
