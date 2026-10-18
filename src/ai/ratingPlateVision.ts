@@ -202,7 +202,7 @@ export async function extractRatingPlate(input: ExtractInput): Promise<Extracted
   );
 
   const shouldInvokeLiveBedrock =
-    Boolean(input.forceLiveBedrock || process.env.BEDROCK_MODE === 'live' || input.imageBase64) &&
+    Boolean(input.forceLiveBedrock || (!input.samplePlateId && input.imageBase64)) &&
     hasAwsCreds;
 
   if (shouldInvokeLiveBedrock) {

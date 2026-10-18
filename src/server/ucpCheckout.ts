@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { appState, UcpCheckoutSession, UcpLineItem, UcpTotal } from './state.js';
+import { recordFsmDispatch } from './fsmWebhook.js';
 
 export const ucpRouter = Router();
 
@@ -159,6 +160,7 @@ ucpRouter.post('/checkout-sessions', (req: Request, res: Response) => {
       }
     ),
     messages: [],
+    metadata: req.body.metadata || {},
     createdAtIso: new Date().toISOString(),
     updatedAtIso: new Date().toISOString(),
   };
@@ -294,6 +296,26 @@ ucpRouter.post('/checkout-sessions/:id/complete', (req: Request, res: Response) 
     appt.status = 'CONFIRMED';
     appt.updatedAtIso = new Date().toISOString();
   }
+
+  // Decrement part stock on van & record truck roll savings
+  const vanId = (req.body.vanId || session.metadata?.vanId || 'van_apex_04') as string;
+  const sku = (req.body.oemPartSku || session.metadata?.oemPartSku || 'BOSCH-00631200') as string;
+  const tech = (req.body.technicianName || session.metadata?.technicianName || (vanId.includes('apex') ? 'Marcus Vance' : 'Devon Brooks')) as string;
+
+  appState.holdPartOnVan(vanId, sku, session.correlationToken);
+  appState.recordMcpCall(14, true);
+
+  recordFsmDispatch({
+    contractorId: vanId.includes('apex') ? 'contractor_apex_04' : 'contractor_precision_01',
+    companyName: vanId.includes('apex') ? 'Apex Home Services' : 'Precision Trade Pros',
+    vanId,
+    technicianName: tech,
+    appointmentId: session.appointmentId,
+    preDiagnosedOemSku: sku,
+    serialVariantRule: 'Manufacture date 2019+ (Batch FD99+)',
+    ucpDepositPaidUsd: session.totals.find((t) => t.type === 'deposit_due_now')?.amount || 85.0,
+    correlationToken: session.correlationToken,
+  });
 
   const responsePayload = {
     ...session,

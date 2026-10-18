@@ -126,7 +126,8 @@ describe('Sprint 9: Master Layout Clipping Fix, Zero-Overflow Guarantee Across A
   // --------------------------------------------------------------------------
   it('4. Documentation files synchronize verified authentic PR #14, GitHub repo, and live AWS URLs', () => {
     const readme = fs.readFileSync(path.join(process.cwd(), 'README.md'), 'utf-8');
-    const devpost = fs.readFileSync(path.join(process.cwd(), 'docs', 'DEVPOST_SUBMISSION_MASTER.md'), 'utf-8');
+    const friction = fs.readFileSync(path.join(process.cwd(), 'docs', 'FRICTION_LOGS_10_PERCENT_BONUS.md'), 'utf-8');
+    const feedback = fs.readFileSync(path.join(process.cwd(), 'docs', 'PRODUCT_FEEDBACK_5_PARTS.md'), 'utf-8');
     const prTemplate = fs.readFileSync(
       path.join(process.cwd(), 'open-source-contribution', 'devices-agent-skills', 'PULL_REQUEST_TEMPLATE.md'),
       'utf-8'
@@ -140,9 +141,10 @@ describe('Sprint 9: Master Layout Clipping Fix, Zero-Overflow Guarantee Across A
     assert.ok(readme.includes(repoUrl), 'README.md must link github repository');
     assert.ok(readme.includes(awsUrl), 'README.md must link live AWS Lambda URL');
 
-    assert.ok(devpost.includes(prUrl), 'DEVPOST_SUBMISSION_MASTER.md must link PR #14');
-    assert.ok(devpost.includes(repoUrl), 'DEVPOST_SUBMISSION_MASTER.md must link github repository');
-    assert.ok(devpost.includes(awsUrl), 'DEVPOST_SUBMISSION_MASTER.md must link live AWS Lambda URL');
+    assert.ok(friction.includes(prUrl), 'FRICTION_LOGS_10_PERCENT_BONUS.md must link PR #14');
+    assert.ok(friction.includes(awsUrl), 'FRICTION_LOGS_10_PERCENT_BONUS.md must link live AWS Lambda URL');
+
+    assert.ok(feedback.includes(awsUrl), 'PRODUCT_FEEDBACK_5_PARTS.md must link live AWS Lambda URL');
 
     assert.ok(prTemplate.includes(prUrl), 'PULL_REQUEST_TEMPLATE.md must link PR #14');
     assert.ok(prTemplate.includes(repoUrl), 'PULL_REQUEST_TEMPLATE.md must link github repository');

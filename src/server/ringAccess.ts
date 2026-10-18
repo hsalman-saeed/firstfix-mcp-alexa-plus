@@ -29,8 +29,8 @@ ringRouter.post('/v1/ring/access-windows', (req: Request, res: Response) => {
     correlationToken,
     technicianName = 'Marcus Vance',
     vanId = 'van_apex_04',
-    windowStartIso = '2026-10-15T14:00:00Z',
-    windowEndIso = '2026-10-15T15:30:00Z',
+    windowStartIso,
+    windowEndIso,
     cameraDeviceId = 'ring_front_door_cam_01',
   } = req.body;
 
@@ -42,6 +42,10 @@ ringRouter.post('/v1/ring/access-windows', (req: Request, res: Response) => {
     return;
   }
 
+  const nowMs = Date.now();
+  const startIso = windowStartIso || new Date(nowMs - 15 * 60 * 1000).toISOString();
+  const endIso = windowEndIso || new Date(nowMs + 2 * 3600 * 1000).toISOString();
+
   const windowId = `ring_win_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
   const window: RingAccessWindow = {
     windowId,
@@ -50,8 +54,8 @@ ringRouter.post('/v1/ring/access-windows', (req: Request, res: Response) => {
     technicianName,
     vanId,
     cameraDeviceId,
-    windowStartIso,
-    windowEndIso,
+    windowStartIso: startIso,
+    windowEndIso: endIso,
     armed: true,
     securityPolicy: 'MONITORED_SINGLE_ENTRY',
     status: 'SCHEDULED',
@@ -67,8 +71,8 @@ ringRouter.post('/v1/ring/access-windows', (req: Request, res: Response) => {
     status: 'SCHEDULED',
     armed: true,
     technicianName,
-    windowStart: windowStartIso,
-    windowEnd: windowEndIso,
+    windowStart: startIso,
+    windowEnd: endIso,
     cameraDeviceId,
     securityPolicy: 'MONITORED_SINGLE_ENTRY',
   });
@@ -107,16 +111,23 @@ ringRouter.post('/v1/ring/simulate-arrival', (req: Request, res: Response) => {
 
   // Find matching access window
   let matchedWindow: RingAccessWindow | undefined;
-  if (windowId) {
-    matchedWindow = appState.ringAccessWindows.get(windowId);
-  } else if (correlationToken) {
+  if (windowId && appState.ringAccessWindows.has(windowId)) {
+    const candidate = appState.ringAccessWindows.get(windowId);
+    if (candidate && (!correlationToken || candidate.correlationToken === correlationToken)) {
+      matchedWindow = candidate;
+    }
+  }
+  if (!matchedWindow && correlationToken) {
     matchedWindow = Array.from(appState.ringAccessWindows.values()).find(
       (w) => w.correlationToken === correlationToken && w.armed
     );
   }
+  if (!matchedWindow && windowId) {
+    matchedWindow = appState.ringAccessWindows.get(windowId);
+  }
 
   // 1. Token / Window Not Found
-  if (!matchedWindow || matchedWindow.correlationToken !== correlationToken) {
+  if (!matchedWindow || (correlationToken && matchedWindow.correlationToken !== correlationToken)) {
     const log: RingArrivalLog = {
       eventId,
       windowId: windowId || 'unknown',

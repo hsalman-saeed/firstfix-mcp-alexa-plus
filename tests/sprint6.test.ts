@@ -130,20 +130,20 @@ describe('Sprint 6: Audit Fix A-5, Real AWS us-east-1 Deployment, Documentation 
   });
 
   // --------------------------------------------------------------------------
-  // Test 7: Demo Video Script & Devpost Submission Master
+  // Test 7: Friction Logs & Product Feedback Docs
   // --------------------------------------------------------------------------
-  it('7. Demo Video Script & Devpost Submission Master exist and reference live AWS URL', () => {
-    const scriptPath = path.resolve(process.cwd(), 'docs', 'DEMO_VIDEO_PRODUCTION_SCRIPT.md');
-    assert.ok(fs.existsSync(scriptPath), 'docs/DEMO_VIDEO_PRODUCTION_SCRIPT.md must exist');
-    const scriptContent = fs.readFileSync(scriptPath, 'utf-8');
-    assert.ok(scriptContent.includes('2:45 DEMO VIDEO PRODUCTION SCRIPT'));
-    assert.ok(scriptContent.includes(liveBase));
+  it('7. Friction Logs & Product Feedback Docs exist and reference live AWS URL', () => {
+    const frictionPath = path.resolve(process.cwd(), 'docs', 'FRICTION_LOGS_10_PERCENT_BONUS.md');
+    assert.ok(fs.existsSync(frictionPath), 'docs/FRICTION_LOGS_10_PERCENT_BONUS.md must exist');
+    const frictionContent = fs.readFileSync(frictionPath, 'utf-8');
+    assert.ok(frictionContent.includes('OFFICIAL FRICTION LOGS'));
+    assert.ok(frictionContent.includes(liveBase));
 
-    const devpostPath = path.resolve(process.cwd(), 'docs', 'DEVPOST_SUBMISSION_MASTER.md');
-    assert.ok(fs.existsSync(devpostPath), 'docs/DEVPOST_SUBMISSION_MASTER.md must exist');
-    const devpostContent = fs.readFileSync(devpostPath, 'utf-8');
-    assert.ok(devpostContent.includes('DEVPOST SUBMISSION MASTER'));
-    assert.ok(devpostContent.includes(liveBase));
+    const feedbackPath = path.resolve(process.cwd(), 'docs', 'PRODUCT_FEEDBACK_5_PARTS.md');
+    assert.ok(fs.existsSync(feedbackPath), 'docs/PRODUCT_FEEDBACK_5_PARTS.md must exist');
+    const feedbackContent = fs.readFileSync(feedbackPath, 'utf-8');
+    assert.ok(feedbackContent.includes('5-PART COMPREHENSIVE PRODUCT FEEDBACK'));
+    assert.ok(feedbackContent.includes(liveBase));
   });
 
   // --------------------------------------------------------------------------
@@ -172,7 +172,7 @@ describe('Sprint 6: Audit Fix A-5, Real AWS us-east-1 Deployment, Documentation 
       path.resolve(process.cwd(), 'README.md'),
       path.resolve(process.cwd(), '.well-known', 'ucp.json'),
       path.resolve(process.cwd(), 'docs', 'FRICTION_LOGS_10_PERCENT_BONUS.md'),
-      path.resolve(process.cwd(), 'docs', 'DEVPOST_SUBMISSION_MASTER.md'),
+      path.resolve(process.cwd(), 'docs', 'PRODUCT_FEEDBACK_5_PARTS.md'),
       path.resolve(process.cwd(), 'template.yaml'),
       path.resolve(process.cwd(), 'Dockerfile'),
     ];

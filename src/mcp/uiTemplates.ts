@@ -507,13 +507,15 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
       const isRecommended = idx === 0;
       return `
       <div class="van-card ${isRecommended ? 'recommended' : ''}">
-        <span class="van-badge badge-stocked">${slot.truckStockQuantity || 2} on Truck</span>
-        <div class="tech-header">
-          <div class="tech-avatar">👨‍🔧</div>
-          <div>
-            <div style="font-weight:700; font-size:14px;">${slot.technicianName}</div>
-            <div style="font-size:11px; color:var(--text-muted);">${slot.companyName} (${slot.vanId}) • ${slot.rating || 4.9}★</div>
+        <div class="card-header-row">
+          <div class="tech-header">
+            <div class="tech-avatar">👨‍🔧</div>
+            <div>
+              <div style="font-weight:700; font-size:14px;">${slot.technicianName}</div>
+              <div style="font-size:11px; color:var(--text-muted);">${slot.companyName} (${slot.vanId}) • ${slot.rating || 4.9}★</div>
+            </div>
           </div>
+          <span class="van-badge badge-stocked">${slot.truckStockQuantity || 2} on Truck</span>
         </div>
         <div style="font-size:12px; margin: 6px 0; color:#d1d5db;">
           <div><strong>Arrival Slot:</strong> ${slot.startTime} – ${slot.endTime} (Today)</div>
@@ -528,13 +530,15 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
   } else if (brand === 'Rheem' || brand === 'Carrier' || oemPartSku.startsWith('RHEEM') || oemPartSku.startsWith('CARRIER')) {
     vanCardsHtml = `
       <div class="van-card recommended">
-        <span class="van-badge badge-stocked">2 Units on Truck</span>
-        <div class="tech-header">
-          <div class="tech-avatar">👨‍🔧</div>
-          <div>
-            <div style="font-weight:700; font-size:14px;">Devon Brooks</div>
-            <div style="font-size:11px; color:var(--text-muted);">Valley HVAC &amp; Plumbing (Van #7) • 4.9★ (418 reviews)</div>
+        <div class="card-header-row">
+          <div class="tech-header">
+            <div class="tech-avatar">👨‍🔧</div>
+            <div>
+              <div style="font-weight:700; font-size:14px;">Devon Brooks</div>
+              <div style="font-size:11px; color:var(--text-muted);">Valley HVAC &amp; Plumbing (Van #7) • 4.9★ (418 reviews)</div>
+            </div>
           </div>
+          <span class="van-badge badge-stocked">2 Units on Truck</span>
         </div>
         <div style="font-size:12px; margin: 6px 0; color:#d1d5db;">
           <div><strong>Today's Slot:</strong> 14:00 – 15:30 (Today, Verified)</div>
@@ -547,13 +551,15 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
       </div>
 
       <div class="van-card excluded">
-        <span class="van-badge badge-unstocked">Missing Part (0 on Truck)</span>
-        <div class="tech-header">
-          <div class="tech-avatar" style="border-color:#6b7280;">⚠️</div>
-          <div>
-            <div style="font-weight:700; font-size:14px; color:#9ca3af;">Apex Home Services (Van #4)</div>
-            <div style="font-size:11px; color:#6b7280;">Filtered Out to Prevent 2nd Truck Roll</div>
+        <div class="card-header-row">
+          <div class="tech-header">
+            <div class="tech-avatar" style="border-color:#6b7280;">⚠️</div>
+            <div>
+              <div style="font-weight:700; font-size:14px; color:#9ca3af;">Apex Home Services (Van #4)</div>
+              <div style="font-size:11px; color:#6b7280;">Filtered Out to Prevent 2nd Truck Roll</div>
+            </div>
           </div>
+          <span class="van-badge badge-unstocked">Missing Part (0 on Truck)</span>
         </div>
         <p style="font-size:11px; color:#6b7280; margin-top:6px;">
           Technician Marcus Vance lacks ${oemPartSku}. FirstFix filtered this van to prevent a wasted trip fee.
@@ -562,13 +568,15 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
   } else if (oemPartSku === 'BOSCH-00611332') {
     vanCardsHtml = `
       <div class="van-card recommended">
-        <span class="van-badge badge-stocked">2 Units on Truck</span>
-        <div class="tech-header">
-          <div class="tech-avatar">👨‍🔧</div>
-          <div>
-            <div style="font-weight:700; font-size:14px;">Dave Kowalski</div>
-            <div style="font-size:11px; color:var(--text-muted);">Metro Rapid Appliance (Van #2) • 4.7★ (195 reviews)</div>
+        <div class="card-header-row">
+          <div class="tech-header">
+            <div class="tech-avatar">👨‍🔧</div>
+            <div>
+              <div style="font-weight:700; font-size:14px;">Dave Kowalski</div>
+              <div style="font-size:11px; color:var(--text-muted);">Metro Rapid Appliance (Van #2) • 4.7★ (195 reviews)</div>
+            </div>
           </div>
+          <span class="van-badge badge-stocked">2 Units on Truck</span>
         </div>
         <div style="font-size:12px; margin: 6px 0; color:#d1d5db;">
           <div><strong>Today's Slot:</strong> 13:30 – 15:00 (Today, Verified)</div>
@@ -581,13 +589,15 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
       </div>
 
       <div class="van-card">
-        <span class="van-badge badge-stocked">1 Unit on Truck</span>
-        <div class="tech-header">
-          <div class="tech-avatar">👨‍🔧</div>
-          <div>
-            <div style="font-weight:700; font-size:14px;">Marcus Vance</div>
-            <div style="font-size:11px; color:var(--text-muted);">Apex Home Services (Van #4) • 4.9★ (382 reviews)</div>
+        <div class="card-header-row">
+          <div class="tech-header">
+            <div class="tech-avatar">👨‍🔧</div>
+            <div>
+              <div style="font-weight:700; font-size:14px;">Marcus Vance</div>
+              <div style="font-size:11px; color:var(--text-muted);">Apex Home Services (Van #4) • 4.9★ (382 reviews)</div>
+            </div>
           </div>
+          <span class="van-badge badge-stocked">1 Unit on Truck</span>
         </div>
         <div style="font-size:12px; margin: 6px 0; color:#d1d5db;">
           <div><strong>Today's Slot:</strong> 16:30 – 18:00 (Today, Verified)</div>
@@ -602,13 +612,15 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
     // Default: Bosch FD99 BLDC Pump
     vanCardsHtml = `
       <div class="van-card recommended">
-        <span class="van-badge badge-stocked">2 Units on Truck</span>
-        <div class="tech-header">
-          <div class="tech-avatar">👨‍🔧</div>
-          <div>
-            <div style="font-weight:700; font-size:14px;">Marcus Vance</div>
-            <div style="font-size:11px; color:var(--text-muted);">Apex Home Services (Van #4) • 4.9★ (382 reviews)</div>
+        <div class="card-header-row">
+          <div class="tech-header">
+            <div class="tech-avatar">👨‍🔧</div>
+            <div>
+              <div style="font-weight:700; font-size:14px;">Marcus Vance</div>
+              <div style="font-size:11px; color:var(--text-muted);">Apex Home Services (Van #4) • 4.9★ (382 reviews)</div>
+            </div>
           </div>
+          <span class="van-badge badge-stocked">2 Units on Truck</span>
         </div>
         <div style="font-size:12px; margin: 6px 0; color:#d1d5db;">
           <div><strong>Today's Slot:</strong> 14:00 – 15:30 (Today, Verified)</div>
@@ -621,13 +633,15 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
       </div>
 
       <div class="van-card">
-        <span class="van-badge badge-stocked">1 Unit on Truck</span>
-        <div class="tech-header">
-          <div class="tech-avatar">👩‍🔧</div>
-          <div>
-            <div style="font-weight:700; font-size:14px;">Elena Rostova</div>
-            <div style="font-size:11px; color:var(--text-muted);">Precision Trade Pros (Van #1) • 4.8★ (210 reviews)</div>
+        <div class="card-header-row">
+          <div class="tech-header">
+            <div class="tech-avatar">👩‍🔧</div>
+            <div>
+              <div style="font-weight:700; font-size:14px;">Elena Rostova</div>
+              <div style="font-size:11px; color:var(--text-muted);">Precision Trade Pros (Van #1) • 4.8★ (210 reviews)</div>
+            </div>
           </div>
+          <span class="van-badge badge-stocked">1 Unit on Truck</span>
         </div>
         <div style="font-size:12px; margin: 6px 0; color:#d1d5db;">
           <div><strong>Today's Slot:</strong> 15:30 – 17:00 (Today, Verified)</div>
@@ -640,19 +654,22 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
       </div>
 
       <div class="van-card excluded">
-        <span class="van-badge badge-unstocked">Missing Part (0 on Truck)</span>
-        <div class="tech-header">
-          <div class="tech-avatar" style="border-color:#6b7280;">⚠️</div>
-          <div>
-            <div style="font-weight:700; font-size:14px; color:#9ca3af;">Metro Rapid Appliance (Van #2)</div>
-            <div style="font-size:11px; color:#6b7280;">Filtered Out to Prevent 2nd Truck Roll</div>
+        <div class="card-header-row">
+          <div class="tech-header">
+            <div class="tech-avatar" style="border-color:#6b7280;">⚠️</div>
+            <div>
+              <div style="font-weight:700; font-size:14px; color:#9ca3af;">Metro Rapid Appliance (Van #2)</div>
+              <div style="font-size:11px; color:#6b7280;">Filtered Out to Prevent 2nd Truck Roll</div>
+            </div>
           </div>
+          <span class="van-badge badge-unstocked">Missing Part (0 on Truck)</span>
         </div>
         <p style="font-size:11px; color:#6b7280; margin-top:6px;">
           Technician lacks ${oemPartSku}. FirstFix filtered this van to protect your calendar and eliminate repeat visits.
         </p>
       </div>`;
   }
+
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -746,15 +763,23 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
       border-color: var(--card-border);
       background: #0d121d;
     }
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: nowrap;
+      margin-bottom: 8px;
+    }
     .van-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
+      position: static !important;
       font-size: 10px;
       font-weight: 700;
-      padding: 2px 7px;
+      padding: 3px 8px;
       border-radius: 999px;
       text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .badge-stocked { background: rgba(16, 185, 129, 0.2); color: var(--green); border: 1px solid var(--green); }
     .badge-unstocked { background: rgba(239, 68, 68, 0.2); color: var(--red); border: 1px solid var(--red); }
@@ -762,7 +787,8 @@ export function renderStockedProCarouselHtml(params: TemplateParams = {}): strin
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 0;
+      min-width: 0;
     }
     .tech-avatar {
       width: 38px;

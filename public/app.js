@@ -354,6 +354,11 @@ async function executeUcpCheckout(checkoutParams) {
         diagnosticFeeUsd: checkoutParams.diagnosticFeeUsd || 85.0,
         bindingEstimateMinUsd: 185.0,
         bindingEstimateMaxUsd: 215.0,
+        metadata: {
+          vanId: checkoutParams.vanId || 'van_apex_04',
+          oemPartSku: checkoutParams.oemPartSku || state.currentNeededPartSku || 'BOSCH-00631200',
+          technicianName: checkoutParams.technicianName || 'Marcus Vance',
+        },
         fulfillment: {
           type: 'technician_dispatch',
           address: {
@@ -375,6 +380,9 @@ async function executeUcpCheckout(checkoutParams) {
       method: 'POST',
       headers,
       body: JSON.stringify({
+        vanId: checkoutParams.vanId || 'van_apex_04',
+        oemPartSku: checkoutParams.oemPartSku || state.currentNeededPartSku || 'BOSCH-00631200',
+        technicianName: checkoutParams.technicianName || 'Marcus Vance',
         payment_handler: {
           type: 'com.amazon.payments.network_token',
           token: `tok_amzn_pay_${Date.now()}`,
@@ -408,6 +416,8 @@ async function executeUcpCheckout(checkoutParams) {
     showToast('UCP Checkout Failed', String(err), 'error');
   }
 }
+window.executeFullUcpCheckoutFlow = executeUcpCheckout;
+window.firstFixState = state;
 
 // Arms Ring Temporary Monitored Arrival Window
 async function armRingAccessWindow(appointmentId, correlationToken) {
@@ -417,22 +427,25 @@ async function armRingAccessWindow(appointmentId, correlationToken) {
       headers['Authorization'] = `Bearer ${state.activeBearerToken}`;
     }
 
+    const tokenToUse = correlationToken || `corr_ring_${Date.now()}`;
+    const now = Date.now();
     const res = await fetch('/v1/ring/access-windows', {
       method: 'POST',
       headers,
       body: JSON.stringify({
         appointmentId,
-        correlationToken: correlationToken || `corr_ring_${Date.now()}`,
+        correlationToken: tokenToUse,
         technicianName: 'Marcus Vance',
         vanId: 'van_apex_04',
-        windowStartIso: '2026-10-15T14:00:00Z',
-        windowEndIso: '2026-10-15T15:30:00Z',
+        windowStartIso: new Date(now - 15 * 60 * 1000).toISOString(),
+        windowEndIso: new Date(now + 2 * 60 * 60 * 1000).toISOString(),
         cameraDeviceId: 'ring_front_door_cam_01',
       }),
     });
 
     const data = await res.json();
     state.currentWindowId = data.windowId;
+    state.ringCorrelationToken = tokenToUse;
     console.log('[Host] Ring Access Window Armed:', data);
 
     const badge = document.getElementById('ring-badge-status');
@@ -448,7 +461,9 @@ async function armRingAccessWindow(appointmentId, correlationToken) {
 // Simulates Ring Doorbell Arrival Camera Verification
 async function simulateRingArrival(verified) {
   playChime(verified ? 880 : 330);
-  const token = verified ? (state.currentCorrelationToken || 'ff_booking_corr_sample_token') : 'invalid_intruder_token';
+  const token = verified
+    ? (state.ringCorrelationToken || state.currentCorrelationToken || 'ff_booking_corr_sample_token')
+    : 'invalid_intruder_token';
 
   try {
     const headers = { 'Content-Type': 'application/json' };
@@ -866,7 +881,8 @@ async function fetchDynamoRecords() {
 
     const dynamoStatusElem = document.getElementById('aws-dynamo-status');
     if (dynamoStatusElem) {
-      dynamoStatusElem.textContent = `✓ ${data.status} (${data.itemCount} items)`;
+      dynamoStatusElem.textContent = `✓ Active in us-east-1 (FirstFixMcpState • ${data.itemCount} items)`;
+      dynamoStatusElem.className = 'comp-status green';
     }
 
     if (!tbody) return;
@@ -882,7 +898,7 @@ async function fetchDynamoRecords() {
       <tr>
         <td style="font-family:monospace; color:#38bdf8; font-weight:700;">${item.pk}</td>
         <td style="font-family:monospace; color:#94a3b8;">${item.sk}</td>
-        <td style="font-size:11px; color:#cbd5e1;">${JSON.stringify(item.payload).slice(0, 80)}...</td>
+        <td style="font-size:11px; color:#cbd5e1;">${(item.payload ? JSON.stringify(item.payload) : '').slice(0, 80)}...</td>
         <td style="color:#64748b; font-size:10px;">${new Date(item.updatedAt).toLocaleTimeString()}</td>
       </tr>
     `

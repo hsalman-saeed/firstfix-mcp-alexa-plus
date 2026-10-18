@@ -158,12 +158,16 @@ export async function fetchRecentDynamoRecords(limit = 20): Promise<{
   }
 
   try {
-    const scanResult = await client.send(
+    const scanPromise = client.send(
       new ScanCommand({
         TableName: tableName,
         Limit: limit,
       })
     );
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('DynamoDB scan timeout')), 1000)
+    );
+    const scanResult = await Promise.race([scanPromise, timeoutPromise]);
 
     const items: DynamoRecordItem[] = (scanResult.Items || []).map((raw) => {
       let parsedPayload: any = null;

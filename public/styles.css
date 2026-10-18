@@ -235,13 +235,19 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 50%) minmax(0, 50%); /* fractional grid base: minmax(0, 1.05fr) minmax(0, 0.95fr) */
   gap: 14px;
-  padding: 8px 14px;
+  padding: 8px 14px 104px 14px; /* 104px bottom caption safe-zone */
   flex: 1;
   max-width: 100%;
   margin: 0;
   width: 100%;
   box-sizing: border-box;
   align-items: start;
+}
+
+#aws-lambda-url {
+  word-break: break-all;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 @media (max-width: 1150px) {

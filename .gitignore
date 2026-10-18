@@ -1,7 +1,14 @@
 node_modules/
 dist/
-data/
 .env
-.alexa-ai/
+.env.*
+!.env.example
+data/
+artifacts/
+video-production/
+submission/
+*.mp4
+*.webm
 *.log
+.alexa-ai/
 .system_generated/

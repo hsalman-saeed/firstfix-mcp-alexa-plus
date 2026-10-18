@@ -81,6 +81,7 @@ export interface UcpCheckoutSession {
     cancel?: string;
   };
   messages: Array<{ code: string; message: string; severity: 'info' | 'warning' | 'error' }>;
+  metadata?: Record<string, any>;
   createdAtIso: string;
   updatedAtIso: string;
 }
@@ -157,6 +158,21 @@ export class FirstFixStateManager {
     this.ucpSessions.clear();
     this.idempotencyCache.clear();
     this.ringAccessWindows.clear();
+    const sampleWindowId = 'ring_win_seed_sample';
+    this.ringAccessWindows.set(sampleWindowId, {
+      windowId: sampleWindowId,
+      appointmentId: 'apt_seed_marcus_vance',
+      correlationToken: 'ff_booking_corr_sample_token',
+      technicianName: 'Marcus Vance',
+      vanId: 'van_apex_04',
+      cameraDeviceId: 'ring_front_door_cam_01',
+      windowStartIso: '2026-10-15T14:00:00Z',
+      windowEndIso: '2026-10-15T15:30:00Z',
+      armed: true,
+      securityPolicy: 'MONITORED_SINGLE_ENTRY',
+      status: 'SCHEDULED',
+      createdAtIso: new Date().toISOString(),
+    });
     this.ringAuditLogs = [];
     this.activePartHolds.clear();
     this.totalMcpCalls = 0;

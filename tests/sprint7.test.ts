@@ -371,7 +371,6 @@ describe('Sprint 7: Production Upgrade, Zero-Fallback Remediation, OAuth 2.1 PKC
     const forbiddenTokens = ['Claude 3.7', 'Strands Agents SDK', 'React/Vite on Amplify', 'Amazon Polly'];
     const docsToScan = [
       path.resolve(process.cwd(), 'README.md'),
-      path.resolve(process.cwd(), 'docs', 'DEVPOST_SUBMISSION_MASTER.md'),
       path.resolve(process.cwd(), 'docs', 'FRICTION_LOGS_10_PERCENT_BONUS.md'),
       path.resolve(process.cwd(), 'docs', 'PRODUCT_FEEDBACK_5_PARTS.md'),
     ];

@@ -10,7 +10,7 @@
 ## EXECUTIVE SUMMARY & FRICTION OVERVIEW
 During the development of **FirstFix MCP** across Sprints 1 through 6, our engineering team systematically recorded, triaged, and developed production workarounds for **8 major protocol and infrastructure friction points**. These friction points span Model Context Protocol (MCP 2025-11-25 Streamable HTTP), MCP Apps (`text/html;profile=mcp-app`), Universal Commerce Protocol (UCP 2026-01-11), Alexa+ Local Booking SPI, Amazon Bedrock Nova Pro multimodal inference, and AWS Serverless Lambda Function URLs.
 
-To help the broader Amazon developer ecosystem, all workarounds have been packaged into our MIT-licensed standalone open-source SDK (`packages/alexa-plus-ucp-mcp-kit`) and our community contribution for `AmazonAppDev/devices-agent-skills`.
+To help the broader Amazon developer ecosystem, all workarounds have been packaged into our MIT-licensed standalone open-source SDK (`packages/alexa-plus-ucp-mcp-kit`) and our upstream community contribution [Pull Request #14 on AmazonAppDev/devices-agent-skills](https://github.com/AmazonAppDev/devices-agent-skills/pull/14).
 
 | Log ID | Target Amazon / Protocol Tooling | Core Friction Encountered | Production Workaround in FirstFix MCP |
 |---|---|---|---|

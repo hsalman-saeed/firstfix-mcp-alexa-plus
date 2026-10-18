@@ -174,17 +174,15 @@ All official submission materials and judging bonus documents are organized in `
 
 1. **[Friction Logs (+10% Bonus)](docs/FRICTION_LOGS_10_PERCENT_BONUS.md)**: 8 structured friction logs covering MCP headers, Express streams, Bedrock latency, UCP envelopes, and Lambda URL policies.
 2. **[5-Part Product Feedback](docs/PRODUCT_FEEDBACK_5_PARTS.md)**: Comprehensive feedback for Amazon teams across Alexa+ Add-Ons, MCP Apps, UCP, Local Booking SPI, and Bedrock.
-3. **[Demo Video Script & Shot List](docs/DEMO_VIDEO_PRODUCTION_SCRIPT.md)**: Timed, 2:45 scene-by-scene script and screen-recording runbook.
-4. **[Devpost Submission Master](docs/DEVPOST_SUBMISSION_MASTER.md)**: Ready-to-paste Devpost text for all form fields.
 
 ---
 
-## 🧪 AUTOMATED TEST SUITE (60/60 TESTS PASSING)
+## 🧪 AUTOMATED TEST SUITE (90/90 TESTS PASSING)
 
-FirstFix MCP maintains strict test-driven development across all 6 project sprints:
+FirstFix MCP maintains strict test-driven development across all 10 project sprints:
 
 ```bash
-# Run all 60 tests across Sprints 1–6
+# Run all 90 tests across Sprints 1–10
 npm test
 ```
 
